@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 /** Locale-aware formatters bound to the current UI language. */
 export function useFormat() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const locale = i18n.resolvedLanguage ?? 'de';
 
   const date = (
@@ -45,7 +45,16 @@ export function useFormat() {
     }
   };
 
-  return { locale, date, number, bytes, country };
+  /** `1632–1675`, `* 1940`, `† 1528`; negative years are BCE. */
+  const lifespan = ({ birthYear: b, deathYear: d }: { birthYear?: number; deathYear?: number }) => {
+    const year = (y: number) => (y < 0 ? `${-y} ${t('creator.bce')}` : String(y));
+    if (b !== undefined && d !== undefined) return `${year(b)}–${year(d)}`;
+    if (b !== undefined) return `* ${year(b)}`;
+    if (d !== undefined) return `† ${year(d)}`;
+    return '';
+  };
+
+  return { locale, date, number, bytes, country, lifespan };
 }
 
 /** Roman numerals for the editorial section numbering. */

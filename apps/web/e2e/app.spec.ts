@@ -177,3 +177,30 @@ test('shows what is new once after an update', async ({ page }) => {
   await page.goto('/settings');
   await expect(page.getByRole('heading', { name: 'Über Mnemo' })).toBeVisible();
 });
+
+test('artists become people with their own page', async ({ page }) => {
+  await page.goto('/collection');
+  await page.getByRole('button', { name: 'Erstes Werk hinzufügen' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Titel').fill('Feldhase');
+  await dialog.getByLabel('Künstler:in').fill('Albrecht Dürer');
+  await dialog.getByRole('button', { name: 'Speichern' }).click();
+  await expect(dialog).toBeHidden();
+
+  await page.getByText('Feldhase').first().click();
+  await page.getByRole('link', { name: 'Albrecht Dürer' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Albrecht Dürer' })).toBeVisible();
+  await expect(page.getByText('1 Werk in deiner Sammlung')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Person bearbeiten' }).click();
+  const edit = page.getByRole('dialog');
+  await edit.getByLabel('Geboren').fill('1471');
+  await edit.getByLabel('Gestorben').fill('1528');
+  await edit.getByRole('button', { name: 'Speichern' }).click();
+  await expect(edit).toBeHidden();
+  await expect(page.getByText('1471–1528')).toBeVisible();
+
+  await page.goto('/insights');
+  await page.getByRole('link', { name: 'Albrecht Dürer' }).click();
+  await expect(page).toHaveURL(/\/creator\//);
+});

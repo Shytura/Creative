@@ -1,4 +1,5 @@
 import {
+  type Artwork,
   accentFromPalette,
   collectionHas,
   type ItemRef,
@@ -41,6 +42,7 @@ import {
   useArtwork,
   useArtworks,
   useCollections,
+  useCreators,
   useLookups,
   useMedia,
   useMediaUrl,
@@ -71,6 +73,7 @@ export function ArtworkDetailPage() {
   const { venues, placeOfVenue } = useLookups();
   const visits = useVisits();
   const collections = useCollections();
+  const creators = useCreators();
   const allArtworks = useArtworks();
   const [index, setIndex] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -91,12 +94,11 @@ export function ArtworkDetailPage() {
   const related = useMemo(() => {
     if (!artwork || !allArtworks) return { byArtist: [], atVenue: [] };
     const others = allArtworks.filter((a) => a.id !== artwork.id);
+    const sameCreator = (a: Artwork) => a.creatorIds.some((id) => artwork.creatorIds.includes(id));
     return {
-      byArtist: artwork.artist ? others.filter((a) => a.artist === artwork.artist).slice(0, 4) : [],
+      byArtist: others.filter(sameCreator).slice(0, 4),
       atVenue: artwork.venueId
-        ? others
-            .filter((a) => a.venueId === artwork.venueId && a.artist !== artwork.artist)
-            .slice(0, 4)
+        ? others.filter((a) => a.venueId === artwork.venueId && !sameCreator(a)).slice(0, 4)
         : [],
     };
   }, [artwork, allArtworks]);
@@ -127,6 +129,7 @@ export function ArtworkDetailPage() {
   }
 
   const venue = artwork.venueId ? venues.get(artwork.venueId) : undefined;
+  const creator = creators?.find((c) => c.id === artwork.creatorIds[0]);
   const place = placeOfVenue(artwork.venueId);
   const visit = visits?.find((v) => v.id === artwork.visitId);
   const ref: ItemRef = { kind: 'artwork', id: artwork.id };
@@ -208,7 +211,17 @@ export function ArtworkDetailPage() {
           </h1>
           {(artwork.artist || artwork.year) && (
             <p className="caption mt-4 text-2xl text-ink-2">
-              {artwork.artist}
+              {creator ? (
+                <Link
+                  to="/creator/$creatorId"
+                  params={{ creatorId: creator.id }}
+                  className="underline decoration-line-strong decoration-1 underline-offset-[6px] transition-colors hover:text-ink hover:decoration-accent"
+                >
+                  {artwork.artist ?? creator.name}
+                </Link>
+              ) : (
+                artwork.artist
+              )}
               {artwork.artist && artwork.year ? ', ' : ''}
               {artwork.year}
             </p>
@@ -376,7 +389,9 @@ export function ArtworkDetailPage() {
 
       {related.byArtist.length > 0 && (
         <section className="mt-24">
-          <SectionTitle>{t('artwork.moreBy', { artist: artwork.artist })}</SectionTitle>
+          <SectionTitle>
+            {t('artwork.moreBy', { artist: creator?.name ?? artwork.artist })}
+          </SectionTitle>
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {related.byArtist.map((a) => (
               <ArtworkCard key={a.id} artwork={a} crop />

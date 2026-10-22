@@ -88,6 +88,23 @@ export const visitSchema = visitDraftSchema.extend(entityMetaShape);
 export type VisitDraft = z.input<typeof visitDraftSchema>;
 export type Visit = z.infer<typeof visitSchema>;
 
+// ── Creator: a person behind works (artists today, authors later) ─────────
+
+export const creatorDraftSchema = z.object({
+  name: z.string().trim().min(1),
+  /** Negative for years BCE. */
+  birthYear: z.number().int().optional(),
+  deathYear: z.number().int().optional(),
+  /** Short description, e.g. from Wikidata: "Dutch painter". */
+  description: z.string().optional(),
+  imageUrl: z.string().optional(),
+  notes: z.string().default(''),
+  ...externalIdsShape,
+});
+export const creatorSchema = creatorDraftSchema.extend(entityMetaShape);
+export type CreatorDraft = z.input<typeof creatorDraftSchema>;
+export type Creator = z.infer<typeof creatorSchema>;
+
 // ── Artwork ────────────────────────────────────────────────────────────────
 
 export const artworkStatuses = ['seen', 'wishlist'] as const;
@@ -103,7 +120,12 @@ export type ArtworkSource = z.infer<typeof artworkSourceSchema>;
 
 export const artworkDraftSchema = z.object({
   ...collectibleShape,
+  /**
+   * Attribution as the museum writes it, e.g. `Workshop of Rubens`. The people behind it are
+   * linked through `creatorIds`.
+   */
   artist: z.string().optional(),
+  creatorIds: z.array(idSchema).default([]),
   /** Display date as written by the museum, e.g. `c. 1868–73`. */
   year: z.string().optional(),
   medium: z.string().optional(),

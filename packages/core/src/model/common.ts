@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Bumped whenever the persisted data changes shape or a table is added. Each bump comes with an
  * entry in `migrations.ts` (and a matching IndexedDB version in `@mnemo/storage-dexie`).
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const idSchema = z.string().min(1);
 

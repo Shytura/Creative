@@ -5,10 +5,13 @@ import {
   ensureVenue,
   ensureVisit,
   entityNames,
+  mergeDuplicateCreators,
   migrations,
   removeArtwork,
+  removeCreator,
   removePlace,
   SCHEMA_VERSION,
+  saveArtwork,
   toggleInCollection,
 } from '@mnemo/core';
 import { Dexie } from 'dexie';
@@ -159,6 +162,51 @@ describe('domain commands', () => {
   });
 });
 
+describe('creators', () => {
+  it('links artworks to creators through their attribution', async () => {
+    const a = await saveArtwork(store, { title: 'Feldhase', artist: ' Albrecht Dürer ' });
+    const b = await saveArtwork(store, { title: 'Betende Hände', artist: 'albrecht durer' });
+    expect(a.artist).toBe('Albrecht Dürer');
+    expect(b.creatorIds).toEqual(a.creatorIds);
+    expect(await store.creators.list()).toHaveLength(1);
+
+    // Renaming the creator keeps the links while the attribution stays unchanged.
+    await store.creators.update(a.creatorIds[0]!, { name: 'Dürer, Albrecht' });
+    const edited = await saveArtwork(
+      store,
+      { title: 'Der Feldhase', artist: 'Albrecht Dürer' },
+      a.id,
+    );
+    expect(edited.creatorIds).toEqual(a.creatorIds);
+
+    const cleared = await saveArtwork(store, { title: 'Der Feldhase', artist: '' }, a.id);
+    expect(cleared.creatorIds).toEqual([]);
+    expect(cleared.artist).toBeUndefined();
+  });
+
+  it('merges duplicates and keeps the one linked to Wikidata', async () => {
+    const plain = await store.creators.create({ name: 'Vermeer' });
+    const linked = await store.creators.create({ name: 'vermeer', wikidataId: 'Q41264' });
+    const other = await store.creators.create({ name: 'Rembrandt' });
+    const art = await store.artworks.create({ title: 'Milchmagd', creatorIds: [plain.id] });
+
+    expect(await mergeDuplicateCreators(store)).toBe(1);
+    expect((await store.creators.list()).map((c) => c.id).sort()).toEqual(
+      [linked.id, other.id].sort(),
+    );
+    expect((await store.artworks.get(art.id))?.creatorIds).toEqual([linked.id]);
+    expect(await mergeDuplicateCreators(store)).toBe(0);
+  });
+
+  it('unlinks works when a creator is removed', async () => {
+    const art = await saveArtwork(store, { title: 'Kuss', artist: 'Gustav Klimt' });
+    await removeCreator(store, art.creatorIds[0]!);
+    const after = await store.artworks.get(art.id);
+    expect(after?.creatorIds).toEqual([]);
+    expect(after?.artist).toBe('Gustav Klimt');
+  });
+});
+
 describe('snapshot & restore', () => {
   it('replaces data and keeps blobs', async () => {
     const { venue } = await seedVienna();
@@ -211,7 +259,13 @@ describe('schema upgrades', () => {
     const legacy = new Dexie(name);
     legacy.version(1).stores(STORES[1]!);
     const row = { createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' };
-    await legacy.table('artworks').add({ ...row, id: 'a1', schemaVersion: 1, title: 'Feldhase' });
+    await legacy.table('artworks').add({
+      ...row,
+      id: 'a1',
+      schemaVersion: 1,
+      title: 'Feldhase',
+      artist: 'Albrecht Dürer',
+    });
     await legacy.table('collections').add({
       ...row,
       id: 'c1',
@@ -227,7 +281,10 @@ describe('schema upgrades', () => {
     expect(collection?.items).toEqual([{ kind: 'artwork', id: 'a1' }]);
     expect(collection).not.toHaveProperty('artworkIds');
     expect(collection?.schemaVersion).toBe(SCHEMA_VERSION);
-    expect((await upgraded.artworks.get('a1'))?.title).toBe('Feldhase');
+    const artwork = await upgraded.artworks.get('a1');
+    expect(artwork?.title).toBe('Feldhase');
+    expect(artwork?.creatorIds).toEqual(['creator-albrecht-durer']);
+    expect((await upgraded.creators.list()).map((c) => c.name)).toEqual(['Albrecht Dürer']);
     await upgraded.db.delete();
   });
 });

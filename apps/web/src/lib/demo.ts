@@ -1,4 +1,4 @@
-import { createId, type MnemoStore, type VenueKind } from '@mnemo/core';
+import { createId, type MnemoStore, saveArtwork, type VenueKind } from '@mnemo/core';
 import { saveRemoteImage } from './media';
 
 type L = { de: string; en: string };
@@ -297,7 +297,7 @@ export async function seedDemo(
   for (const a of ARTWORKS) {
     const title = pick(a.title);
     const media = await saveRemoteImage(store, commons(a.file), title);
-    const created = await store.artworks.create({
+    const created = await saveArtwork(store, {
       title,
       artist: a.artist,
       year: a.year,

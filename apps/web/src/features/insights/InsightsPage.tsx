@@ -114,11 +114,11 @@ export function InsightsPage() {
         <section>
           <SectionTitle>{t('insights.artists')}</SectionTitle>
           <RankList
-            items={insights.topArtists.map((a) => ({
-              key: a.value,
-              label: a.value,
-              value: a.count,
-              link: { to: '/collection', search: { artist: a.value } } as const,
+            items={insights.topCreators.map((c) => ({
+              key: c.creator.id,
+              label: c.creator.name,
+              value: c.count,
+              creatorId: c.creator.id,
             }))}
           />
         </section>
@@ -230,7 +230,7 @@ type RankItem = {
   key: string;
   label: string;
   value: number;
-  link?: { to: '/collection'; search: { artist: string } };
+  creatorId?: string;
   venueId?: string;
 };
 
@@ -244,8 +244,12 @@ function RankList({ items }: { items: RankItem[] }) {
           <li key={item.key}>
             <div className="flex items-baseline gap-3 text-sm">
               <span className="w-5 text-xs text-ink-3 tabular-nums">{index + 1}</span>
-              {item.link ? (
-                <Link {...item.link} className="min-w-0 flex-1 truncate hover:text-accent">
+              {item.creatorId ? (
+                <Link
+                  to="/creator/$creatorId"
+                  params={{ creatorId: item.creatorId }}
+                  className="min-w-0 flex-1 truncate hover:text-accent"
+                >
                   {label}
                 </Link>
               ) : item.venueId ? (

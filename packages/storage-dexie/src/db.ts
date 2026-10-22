@@ -2,8 +2,10 @@ import {
   type EntityName,
   type EntityOf,
   entityNames,
+  type Migration,
   migrateRow,
   migrations,
+  type RawTables,
   type Settings,
 } from '@mnemo/core';
 import { Dexie, type Table, type Transaction } from 'dexie';
@@ -34,6 +36,10 @@ export const STORES: Readonly<Record<number, Record<string, string | null>>> = {
     settings: 'id',
   },
   2: {},
+  3: {
+    artworks: 'id, venueId, visitId, status, createdAt, *creatorIds',
+    creators: 'id, name, wikidataId',
+  },
 };
 
 export class MnemoDatabase extends Dexie {
@@ -48,7 +54,7 @@ export class MnemoDatabase extends Dexie {
       if (!stores) throw new Error(`No IndexedDB schema for version ${step.to}`);
       this.version(step.to)
         .stores(stores)
-        .upgrade((tx) => upgradeTo(tx, step.to));
+        .upgrade((tx) => upgradeTo(tx, step));
     }
   }
 
@@ -58,15 +64,35 @@ export class MnemoDatabase extends Dexie {
   }
 }
 
-/** Runs the core migration step for `version` over every stored row. */
-async function upgradeTo(tx: Transaction, version: number) {
-  for (const name of entityNames) {
-    if (!tx.storeNames.includes(name)) continue;
+/** Tables that exist in IndexedDB at a given version (`null` in `STORES` deletes one). */
+function tablesAt(version: number): Set<string> {
+  const tables = new Set<string>();
+  for (const [v, stores] of Object.entries(STORES)) {
+    if (Number(v) > version) continue;
+    for (const [name, spec] of Object.entries(stores)) {
+      if (spec === null) tables.delete(name);
+      else tables.add(name);
+    }
+  }
+  return tables;
+}
+
+/** Runs one core migration step over the stored data. */
+async function upgradeTo(tx: Transaction, step: Migration) {
+  const names = entityNames.filter((name) => tablesAt(step.to).has(name));
+  for (const name of names) {
     await tx
       .table(name)
       .toCollection()
       .modify((row, ctx) => {
-        ctx.value = migrateRow(name, row, version);
+        ctx.value = migrateRow(name, row, step.to);
       });
+  }
+  if (!step.dataset) return;
+  const tables: RawTables = Object.fromEntries(
+    await Promise.all(names.map(async (name) => [name, await tx.table(name).toArray()] as const)),
+  );
+  for (const [name, rows] of Object.entries(step.dataset(tables))) {
+    if (rows?.length) await tx.table(name).bulkPut(rows);
   }
 }

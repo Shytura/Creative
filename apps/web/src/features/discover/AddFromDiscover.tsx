@@ -1,4 +1,4 @@
-import { type ArtworkStatus, ensureVisit, type Venue } from '@mnemo/core';
+import { type ArtworkStatus, ensureVisit, saveArtwork, type Venue } from '@mnemo/core';
 import type { ArtworkSearchResult } from '@mnemo/providers';
 import { Button, Dialog, DialogContent, Field, Input, Segmented, Spinner, Switch } from '@mnemo/ui';
 import { useNavigate } from '@tanstack/react-router';
@@ -38,7 +38,7 @@ export function AddFromDiscover({
         status === 'seen' && venue && date
           ? (await ensureVisit(store, venue.id, date)).id
           : undefined;
-      const artwork = await store.artworks.create({
+      const artwork = await saveArtwork(store, {
         title: result.title,
         artist: result.artist,
         year: result.year,

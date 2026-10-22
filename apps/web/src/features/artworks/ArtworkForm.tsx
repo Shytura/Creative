@@ -4,6 +4,7 @@ import {
   collectionHas,
   ensureVisit,
   nearby,
+  saveArtwork,
   setCollectionsOf,
   type Venue,
 } from '@mnemo/core';
@@ -31,6 +32,7 @@ import { toast } from 'sonner';
 import {
   useArtwork,
   useCollections,
+  useCreators,
   useLookups,
   useProviderContext,
   useVenues,
@@ -76,6 +78,7 @@ function ArtworkForm({
   const venues = useVenues();
   const visits = useVisits();
   const collections = useCollections();
+  const creators = useCreators();
 
   const initialVisit = visits?.find((v) => v.id === (artwork?.visitId ?? spec.visitId));
   const [title, setTitle] = useState(artwork?.title ?? '');
@@ -208,9 +211,7 @@ function ArtworkForm({
         mediaIds,
         palette: primary?.palette ?? [],
       };
-      const saved = artwork
-        ? await store.artworks.update(artwork.id, draft)
-        : await store.artworks.create(draft);
+      const saved = await saveArtwork(store, draft, artwork?.id);
 
       for (const removed of (artwork?.mediaIds ?? []).filter((id) => !keptMediaIds.includes(id))) {
         await store.media.delete(removed);
@@ -342,8 +343,22 @@ function ArtworkForm({
             )}
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t('artwork.fields.artist')}>
-              {(id) => <Input id={id} value={artist} onChange={(e) => setArtist(e.target.value)} />}
+            <Field label={t('artwork.fields.artist')} hint={t('artwork.artistHint')}>
+              {(id) => (
+                <>
+                  <Input
+                    id={id}
+                    list="creator-names"
+                    value={artist}
+                    onChange={(e) => setArtist(e.target.value)}
+                  />
+                  <datalist id="creator-names">
+                    {creators?.map((c) => (
+                      <option key={c.id} value={c.name} />
+                    ))}
+                  </datalist>
+                </>
+              )}
             </Field>
             <Field label={t('artwork.fields.year')} hint={t('artwork.form.yearHint')}>
               {(id) => <Input id={id} value={year} onChange={(e) => setYear(e.target.value)} />}

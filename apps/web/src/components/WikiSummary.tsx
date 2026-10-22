@@ -13,6 +13,8 @@ interface WikiSummaryProps {
   title?: string | undefined;
   className?: string;
   layout?: 'aside' | 'inline';
+  /** Off when the page already shows its own picture of the subject. */
+  showImage?: boolean;
 }
 
 export function useWikiSummary(tag?: string, title?: string) {
@@ -29,7 +31,13 @@ export function useWikiSummary(tag?: string, title?: string) {
   });
 }
 
-export function WikiSummary({ tag, title, className, layout = 'aside' }: WikiSummaryProps) {
+export function WikiSummary({
+  tag,
+  title,
+  className,
+  layout = 'aside',
+  showImage = true,
+}: WikiSummaryProps) {
   const { t } = useTranslation();
   const summary = useWikiSummary(tag, title);
 
@@ -53,7 +61,7 @@ export function WikiSummary({ tag, title, className, layout = 'aside' }: WikiSum
         className,
       )}
     >
-      {data.imageUrl && (
+      {showImage && data.imageUrl && (
         <RemoteImage
           src={data.imageUrl}
           alt={data.title}

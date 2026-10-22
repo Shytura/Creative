@@ -10,5 +10,6 @@ export * from './model/settings';
 export * from './repositories';
 export * from './services/collections';
 export * from './services/commands';
+export * from './services/creators';
 export * from './services/insights';
 export * from './services/queries';

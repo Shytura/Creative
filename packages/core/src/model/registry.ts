@@ -5,6 +5,8 @@ import {
   type CollectibleKind,
   collectionDraftSchema,
   collectionSchema,
+  creatorDraftSchema,
+  creatorSchema,
   mediaDraftSchema,
   mediaSchema,
   placeDraftSchema,
@@ -36,6 +38,7 @@ export const entities = {
   artworks: { schema: artworkSchema, draftSchema: artworkDraftSchema },
   collections: { schema: collectionSchema, draftSchema: collectionDraftSchema },
   trips: { schema: tripSchema, draftSchema: tripDraftSchema },
+  creators: { schema: creatorSchema, draftSchema: creatorDraftSchema },
   media: { schema: mediaSchema, draftSchema: mediaDraftSchema },
 } as const satisfies Record<string, EntityDefinition>;
 

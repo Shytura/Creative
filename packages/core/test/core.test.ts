@@ -5,6 +5,7 @@ import {
   archiveToSnapshot,
   artworkOfTheDay,
   artworkSchema,
+  type Creator,
   collectibleKinds,
   collectibleTables,
   collectionHas,
@@ -13,6 +14,7 @@ import {
   computeInsights,
   contrastRatio,
   createArchive,
+  creatorSchema,
   distanceKm,
   emptySnapshot,
   ensureContrast,
@@ -51,6 +53,7 @@ const venue = (id: string, placeId: string, name: string): Venue =>
   venueSchema.parse({ ...meta(id), placeId, name });
 const visit = (id: string, venueId: string, date: string): Visit =>
   visitSchema.parse({ ...meta(id), venueId, date });
+const creator = (id: string, name: string): Creator => creatorSchema.parse({ ...meta(id), name });
 const artwork = (id: string, fields: Partial<Artwork> = {}): Artwork =>
   artworkSchema.parse({ ...meta(id), title: `Werk ${id}`, ...fields });
 
@@ -223,10 +226,11 @@ describe('insights', () => {
         visit('x3', 'v2', '2024-08-01'),
       ],
       artworks: [
-        artwork('a1', { artist: 'Dürer', venueId: 'v1' }),
-        artwork('a2', { artist: 'Dürer' }),
-        artwork('a3', { status: 'wishlist', venueId: 'v3' }),
+        artwork('a1', { artist: 'Dürer', creatorIds: ['c1'], venueId: 'v1' }),
+        artwork('a2', { artist: 'Werkstatt Dürers', creatorIds: ['c1'] }),
+        artwork('a3', { status: 'wishlist', venueId: 'v3', creatorIds: ['c2'] }),
       ],
+      creators: [creator('c1', 'Albrecht Dürer'), creator('c2', 'Raffael')],
     });
     expect(insights.totals).toMatchObject({
       countries: 2,
@@ -240,7 +244,9 @@ describe('insights', () => {
       { year: 2023, count: 1 },
       { year: 2024, count: 2 },
     ]);
-    expect(insights.topArtists[0]).toEqual({ value: 'Dürer', count: 2 });
+    expect(insights.topCreators.map((c) => [c.creator.name, c.count])).toEqual([
+      ['Albrecht Dürer', 2],
+    ]);
     expect(insights.topVenues[0]?.venue.name).toBe('Albertina');
     expect(insights.firstVisit?.id).toBe('x1');
     expect(insights.visitedPlaceIds.has('p3')).toBe(false);
@@ -253,11 +259,12 @@ describe('archive', () => {
     venues: [venue('v1', 'p1', 'Albertina'), venue('v2', 'p1', 'Belvedere')],
     visits: [visit('x1', 'v1', '2023-04-02')],
     artworks: [
-      artwork('a1', { venueId: 'v1', mediaIds: ['m1'] }),
+      artwork('a1', { venueId: 'v1', mediaIds: ['m1'], creatorIds: ['c1'] }),
       artwork('a2', { venueId: 'v2' }),
     ],
     collections: [],
     trips: [],
+    creators: [creator('c1', 'Albrecht Dürer')],
     media: [
       {
         ...meta('m1'),
@@ -295,6 +302,7 @@ describe('archive', () => {
     expect(subset.artworks.map((a) => a.id)).toEqual(['a1']);
     expect(subset.venues.map((v) => v.id)).toEqual(['v1']);
     expect(subset.visits.map((v) => v.id)).toEqual(['x1']);
+    expect(subset.creators.map((c) => c.id)).toEqual(['c1']);
     expect(subset.media).toHaveLength(1);
     expect(subset.collections[0]?.items).toEqual([{ kind: 'artwork', id: 'a1' }]);
     expect(subset.trips).toEqual([]);
@@ -328,6 +336,36 @@ describe('archive', () => {
     expect(parsed.places).toEqual([]);
   });
 
+  it('turns artist names of older archives into linked creators', () => {
+    const v2 = {
+      format: 'mnemo-archive',
+      version: 2,
+      exportedAt: '2026-10-22T10:00:00Z',
+      artworks: [
+        { ...meta('a1'), schemaVersion: 2, title: 'Feldhase', artist: 'Albrecht Dürer' },
+        { ...meta('a2'), schemaVersion: 2, title: 'Betende Hände', artist: 'albrecht dürer ' },
+        { ...meta('a3'), schemaVersion: 2, title: 'Ohne Namen' },
+      ],
+    };
+    const parsed = parseArchive(v2);
+    expect(parsed.creators).toHaveLength(1);
+    expect(parsed.creators[0]).toMatchObject({
+      id: 'creator-albrecht-durer',
+      name: 'Albrecht Dürer',
+      schemaVersion: SCHEMA_VERSION,
+    });
+    expect(parsed.artworks.map((a) => a.creatorIds)).toEqual([
+      ['creator-albrecht-durer'],
+      ['creator-albrecht-durer'],
+      [],
+    ]);
+    // Data that is already current is left alone.
+    expect(parseArchive(createArchive(archiveToSnapshot(parsed)))).toEqual({
+      ...parsed,
+      exportedAt: expect.any(String),
+    });
+  });
+
   it('refuses archives from a newer version', () => {
     const future = { format: 'mnemo-archive', version: SCHEMA_VERSION + 1, exportedAt: '' };
     expect(() => parseArchive(future)).toThrow(NewerSchemaError);
@@ -343,6 +381,7 @@ describe('registry & migrations', () => {
       'artworks',
       'collections',
       'trips',
+      'creators',
       'media',
     ]);
     expect(Object.keys(emptySnapshot())).toEqual(entityNames);

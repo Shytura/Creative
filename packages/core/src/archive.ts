@@ -64,7 +64,8 @@ export function createArchive(
 export function parseArchive(input: unknown): Archive {
   const { version } = envelopeSchema.parse(input);
   if (version > ARCHIVE_VERSION) throw new NewerSchemaError(version);
-  return archiveSchema.parse(migrateTables(input as object)) as unknown as Archive;
+  const migrated = { ...migrateTables(input as object, version), version: ARCHIVE_VERSION };
+  return archiveSchema.parse(migrated) as unknown as Archive;
 }
 
 export function archiveToSnapshot(archive: Archive): StoreSnapshot {
@@ -86,10 +87,11 @@ export function subsetArchive(archive: Archive, items: readonly ItemRef[]): Arch
     Array<{ mediaIds: string[] }>
   >;
 
-  // Artworks bring the venues, places and visits they were seen at.
+  // Artworks bring their creators and the venues, places and visits they were seen at.
   const venueIds = new Set(artworks.flatMap((a) => (a.venueId ? [a.venueId] : [])));
   const venues = archive.venues.filter((v) => venueIds.has(v.id));
   const placeIds = new Set(venues.map((v) => v.placeId));
+  const creatorIds = new Set(artworks.flatMap((a) => a.creatorIds));
   const mediaIds = new Set(
     Object.values(collectibles).flatMap((list) => list.flatMap((c) => c.mediaIds)),
   );
@@ -101,6 +103,7 @@ export function subsetArchive(archive: Archive, items: readonly ItemRef[]): Arch
     venues,
     places: archive.places.filter((p) => placeIds.has(p.id)),
     visits: archive.visits.filter((v) => venueIds.has(v.venueId)),
+    creators: archive.creators.filter((c) => creatorIds.has(c.id)),
     collections: archive.collections
       .map((c) => ({
         ...c,

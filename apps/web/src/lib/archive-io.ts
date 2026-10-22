@@ -4,6 +4,7 @@ import {
   createArchive,
   type MediaBlobs,
   type MnemoStore,
+  mergeDuplicateCreators,
   parseArchive,
   subsetArchive,
   todayIsoDate,
@@ -129,5 +130,7 @@ export async function importArchive(
     return !m.remoteUrl && src?.startsWith('http') ? { ...m, remoteUrl: src } : m;
   });
   await store.restore(snapshot, blobs, mode);
+  // Someone else's export may name the same people under other ids.
+  if (mode === 'merge') await mergeDuplicateCreators(store);
   return { artworks: snapshot.artworks.length, places: snapshot.places.length };
 }
