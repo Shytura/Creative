@@ -12,6 +12,7 @@ export { europeanaProvider, harvardProvider, mapEuropeana, mapHarvard } from './
 export { mapMetObject, metProvider } from './art/met';
 export { buildWikidataQuery, mapWikidata, wikidataProvider } from './art/wikidata';
 export { fetchJson, ProviderError } from './http';
+export { mapWikidataPerson, wikidataPeopleProvider, wikidataYear } from './people/wikidata';
 export { venueKindFromOsm, venueKindFromTags } from './places/osm';
 export {
   buildOverpassQuery,

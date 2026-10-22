@@ -90,6 +90,30 @@ export interface PoiProvider {
   nearby(center: Coords, radiusMeters: number, ctx: ProviderContext): Promise<PoiResult[]>;
 }
 
+// ── People ─────────────────────────────────────────────────────────────────
+
+export interface PersonResult {
+  wikidataId: string;
+  name: string;
+  description?: string;
+  /** Negative for years BCE. */
+  birthYear?: number;
+  deathYear?: number;
+  imageUrl?: string;
+  /** Wikipedia article as `lang:Title`. */
+  wikipedia?: string;
+  url: string;
+}
+
+/** Looks up artists, authors and other people behind works. */
+export interface PeopleProvider {
+  id: string;
+  name: string;
+  homepage: string;
+  search(query: string, ctx: ProviderContext): Promise<PersonResult[]>;
+  get(id: string, ctx: ProviderContext): Promise<PersonResult | undefined>;
+}
+
 export interface WikiSummary {
   title: string;
   extract: string;

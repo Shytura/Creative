@@ -1,0 +1,663 @@
+{
+ "entities": {
+  "Q19912259": {
+   "type": "item",
+   "id": "Q19912259",
+   "labels": {
+    "de": {
+     "language": "de",
+     "value": "Vermeer"
+    },
+    "en": {
+     "language": "en",
+     "value": "Vermeer"
+    },
+    "mul": {
+     "language": "mul",
+     "value": "Vermeer"
+    }
+   },
+   "descriptions": {
+    "de": {
+     "language": "de",
+     "value": "Familienname"
+    },
+    "en": {
+     "language": "en",
+     "value": "family name"
+    }
+   },
+   "claims": {
+    "P31": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P31",
+       "datavalue": {
+        "value": {
+         "entity-type": "item",
+         "numeric-id": 101352,
+         "id": "Q101352"
+        },
+        "type": "wikibase-entityid"
+       }
+      },
+      "rank": "normal"
+     }
+    ]
+   },
+   "sitelinks": {
+    "enwiki": {
+     "site": "enwiki",
+     "title": "Vermeer (surname)"
+    }
+   }
+  },
+  "Q41264": {
+   "type": "item",
+   "id": "Q41264",
+   "labels": {
+    "de": {
+     "language": "de",
+     "value": "Jan Vermeer"
+    },
+    "en": {
+     "language": "en",
+     "value": "Johannes Vermeer"
+    },
+    "mul": {
+     "language": "mul",
+     "value": "Johannes Vermeer"
+    }
+   },
+   "descriptions": {
+    "en": {
+     "language": "en",
+     "value": "Dutch painter (1632–1675)"
+    },
+    "de": {
+     "language": "de",
+     "value": "holländischer Maler (1632–1675)"
+    }
+   },
+   "claims": {
+    "P569": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P569",
+       "datavalue": {
+        "value": {
+         "time": "+1632-10-00T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 10,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P570": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P570",
+       "datavalue": {
+        "value": {
+         "time": "+1675-12-15T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 11,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "deprecated"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P570",
+       "datavalue": {
+        "value": {
+         "time": "+1675-00-00T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 9,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P570",
+       "datavalue": {
+        "value": {
+         "time": "+1675-12-15T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 11,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "preferred"
+     }
+    ],
+    "P31": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P31",
+       "datavalue": {
+        "value": {
+         "entity-type": "item",
+         "numeric-id": 5,
+         "id": "Q5"
+        },
+        "type": "wikibase-entityid"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P18": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P18",
+       "datavalue": {
+        "value": "Cropped version of Jan Vermeer van Delft 002.jpg",
+        "type": "string"
+       }
+      },
+      "rank": "normal"
+     }
+    ]
+   },
+   "sitelinks": {
+    "dewiki": {
+     "site": "dewiki",
+     "title": "Jan Vermeer"
+    },
+    "enwiki": {
+     "site": "enwiki",
+     "title": "Johannes Vermeer"
+    }
+   }
+  },
+  "Q115955446": {
+   "type": "item",
+   "id": "Q115955446",
+   "labels": {
+    "en": {
+     "language": "en",
+     "value": "Vermeer"
+    },
+    "de": {
+     "language": "de",
+     "value": "Vermeer"
+    }
+   },
+   "descriptions": {
+    "en": {
+     "language": "en",
+     "value": "2023 art exhibition at the Rijksmuseum Amsterdam with 28paintings by Johannes Vermeer"
+    },
+    "de": {
+     "language": "de",
+     "value": "Kunstausstellung 2023 im Rijksmuseum Amsterdam mit 28 Gemälden von Johannes Vermeer"
+    }
+   },
+   "claims": {
+    "P31": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P31",
+       "datavalue": {
+        "value": {
+         "entity-type": "item",
+         "numeric-id": 667276,
+         "id": "Q667276"
+        },
+        "type": "wikibase-entityid"
+       }
+      },
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P31",
+       "datavalue": {
+        "value": {
+         "entity-type": "item",
+         "numeric-id": 47114558,
+         "id": "Q47114558"
+        },
+        "type": "wikibase-entityid"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P18": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P18",
+       "datavalue": {
+        "value": "Rijksmuseum Amsterdam - South facade - Vermeer exhibition (Detail).jpg",
+        "type": "string"
+       }
+      },
+      "rank": "normal"
+     }
+    ]
+   },
+   "sitelinks": {
+    "dewiki": {
+     "site": "dewiki",
+     "title": "Vermeer (Ausstellung 2023)"
+    }
+   }
+  },
+  "Q944834": {
+   "type": "item",
+   "id": "Q944834",
+   "labels": {
+    "en": {
+     "language": "en",
+     "value": "Jan Vermeer van Haarlem"
+    },
+    "de": {
+     "language": "de",
+     "value": "Jan Vermeer van Haarlem"
+    }
+   },
+   "descriptions": {
+    "en": {
+     "language": "en",
+     "value": "Dutch landscape painter (1656-1705)"
+    }
+   },
+   "claims": {
+    "P31": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P31",
+       "datavalue": {
+        "value": {
+         "entity-type": "item",
+         "numeric-id": 5,
+         "id": "Q5"
+        },
+        "type": "wikibase-entityid"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P569": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P569",
+       "datavalue": {
+        "value": {
+         "time": "+1656-11-29T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 11,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P570": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P570",
+       "datavalue": {
+        "value": {
+         "time": "+1705-05-28T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 11,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P18": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P18",
+       "datavalue": {
+        "value": "Portret van Johannes van der Meer de Jonge, RP-T-1940-80.jpg",
+        "type": "string"
+       }
+      },
+      "rank": "normal"
+     }
+    ]
+   },
+   "sitelinks": {
+    "enwiki": {
+     "site": "enwiki",
+     "title": "Jan Vermeer van Haarlem"
+    }
+   }
+  },
+  "Q3159680": {
+   "type": "item",
+   "id": "Q3159680",
+   "labels": {
+    "en": {
+     "language": "en",
+     "value": "Jan Vermeer van Haarlem the Elder"
+    },
+    "de": {
+     "language": "de",
+     "value": "Jan van der Meer d.Ä."
+    }
+   },
+   "descriptions": {
+    "en": {
+     "language": "en",
+     "value": "painter from the Northern Netherlands and father of Barend, Isaac, and Jan Vermeer or van der Meer II (1628-1691)"
+    },
+    "de": {
+     "language": "de",
+     "value": "Maler der nördlichen Niederlande"
+    }
+   },
+   "claims": {
+    "P31": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P31",
+       "datavalue": {
+        "value": {
+         "entity-type": "item",
+         "numeric-id": 5,
+         "id": "Q5"
+        },
+        "type": "wikibase-entityid"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P569": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P569",
+       "datavalue": {
+        "value": {
+         "time": "+1628-01-01T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 9,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P569",
+       "datavalue": {
+        "value": {
+         "time": "+1628-10-22T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 11,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "preferred"
+     }
+    ],
+    "P570": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P570",
+       "datavalue": {
+        "value": {
+         "time": "+1691-01-01T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 9,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P570",
+       "datavalue": {
+        "value": {
+         "time": "+1691-08-25T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 11,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "preferred"
+     }
+    ],
+    "P18": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P18",
+       "datavalue": {
+        "value": "Portret van Johannes van der Meer de Oude, RP-T-1940-81.jpg",
+        "type": "string"
+       }
+      },
+      "rank": "normal"
+     }
+    ]
+   },
+   "sitelinks": {
+    "enwiki": {
+     "site": "enwiki",
+     "title": "Jan Vermeer van Haarlem the Elder"
+    }
+   }
+  },
+  "Q5598": {
+   "type": "item",
+   "id": "Q5598",
+   "labels": {
+    "en": {
+     "language": "en",
+     "value": "Rembrandt"
+    },
+    "de": {
+     "language": "de",
+     "value": "Rembrandt van Rijn"
+    },
+    "mul": {
+     "language": "mul",
+     "value": "Rembrandt"
+    }
+   },
+   "descriptions": {
+    "en": {
+     "language": "en",
+     "value": "Dutch painter and printmaker (1606–1669)"
+    },
+    "de": {
+     "language": "de",
+     "value": "niederländischer Maler und Kupferstecher (1606–1669)"
+    }
+   },
+   "claims": {
+    "P18": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P18",
+       "datavalue": {
+        "value": "Rembrandt van Rijn - Self-Portrait - Google Art Project.jpg",
+        "type": "string"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P569": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P569",
+       "datavalue": {
+        "value": {
+         "time": "+1606-07-15T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 11,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "preferred"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P569",
+       "datavalue": {
+        "value": {
+         "time": "+1606-01-01T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 9,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P570": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P570",
+       "datavalue": {
+        "value": {
+         "time": "+1669-10-04T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 11,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "preferred"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P570",
+       "datavalue": {
+        "value": {
+         "time": "+1669-01-01T00:00:00Z",
+         "timezone": 0,
+         "before": 0,
+         "after": 0,
+         "precision": 9,
+         "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+        },
+        "type": "time"
+       }
+      },
+      "rank": "normal"
+     }
+    ],
+    "P31": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P31",
+       "datavalue": {
+        "value": {
+         "entity-type": "item",
+         "numeric-id": 5,
+         "id": "Q5"
+        },
+        "type": "wikibase-entityid"
+       }
+      },
+      "rank": "normal"
+     }
+    ]
+   },
+   "sitelinks": {
+    "dewiki": {
+     "site": "dewiki",
+     "title": "Rembrandt van Rijn"
+    },
+    "enwiki": {
+     "site": "enwiki",
+     "title": "Rembrandt"
+    }
+   }
+  }
+ },
+ "success": 1
+}

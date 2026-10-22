@@ -14,6 +14,7 @@ import {
   mapPhotonFeature,
   mapSummary,
   mapWikidata,
+  mapWikidataPerson,
   metProvider,
   overpassProvider,
   ProviderError,
@@ -21,7 +22,9 @@ import {
   providersNeedingKeys,
   resolveCommonsImage,
   venueKindFromTags,
+  wikidataPeopleProvider,
   wikidataProvider,
+  wikidataYear,
   wikipediaSummary,
 } from '../src';
 import aicSearch from './fixtures/aic-search.json';
@@ -30,6 +33,8 @@ import metObject from './fixtures/met-object.json';
 import metSearch from './fixtures/met-search.json';
 import overpass from './fixtures/overpass.json';
 import photonCities from './fixtures/photon-cities.json';
+import wikidataPeopleEntities from './fixtures/wikidata-people-entities.json';
+import wikidataPeopleSearch from './fixtures/wikidata-people-search.json';
 import wikidataSearch from './fixtures/wikidata-search.json';
 import wikipediaDisambiguation from './fixtures/wikipedia-summary.json';
 
@@ -290,5 +295,50 @@ describe('overpass', () => {
       fetch: fetch as never,
     });
     expect(pois.length).toBeGreaterThan(0);
+  });
+});
+
+describe('people', () => {
+  it('reads years from Wikidata time values', () => {
+    expect(wikidataYear({ time: '+1632-10-00T00:00:00Z', precision: 10 })).toBe(1632);
+    expect(wikidataYear({ time: '-0469-01-01T00:00:00Z', precision: 9 })).toBe(-469);
+    expect(wikidataYear({ time: '+1500-00-00T00:00:00Z', precision: 7 })).toBeUndefined();
+    expect(wikidataYear(undefined)).toBeUndefined();
+  });
+
+  it('maps humans and skips everything else', () => {
+    type Entity = Parameters<typeof mapWikidataPerson>[0];
+    const entity = (id: string) =>
+      (wikidataPeopleEntities.entities as unknown as Record<string, Entity>)[id]!;
+    expect(mapWikidataPerson(entity('Q19912259'), 'de')).toBeUndefined(); // family name
+    expect(mapWikidataPerson(entity('Q115955446'), 'de')).toBeUndefined(); // exhibition
+    expect(mapWikidataPerson(entity('Q41264'), 'de')).toMatchObject({
+      wikidataId: 'Q41264',
+      name: 'Jan Vermeer',
+      description: 'holländischer Maler (1632–1675)',
+      birthYear: 1632,
+      deathYear: 1675,
+      wikipedia: 'de:Jan Vermeer',
+      url: 'https://www.wikidata.org/wiki/Q41264',
+    });
+    expect(mapWikidataPerson(entity('Q41264'), 'de')?.imageUrl).toMatch(
+      /^https:\/\/commons\.wikimedia\.org\/wiki\/Special:FilePath\/.+\?width=600$/,
+    );
+    // Falls back to the English article when there is none in the UI language.
+    expect(mapWikidataPerson(entity('Q944834'), 'de')?.wikipedia).toMatch(/^en:/);
+  });
+
+  it('searches, then loads details in search order', async () => {
+    const fetch = vi.fn(async (url: string | URL | Request) =>
+      json(
+        String(url).includes('wbsearchentities') ? wikidataPeopleSearch : wikidataPeopleEntities,
+      ),
+    );
+    const results = await wikidataPeopleProvider.search('Vermeer', {
+      locale: 'de',
+      fetch: fetch as never,
+    });
+    expect(String(fetch.mock.calls[0]?.[0])).toContain('origin=*');
+    expect(results.map((r) => r.wikidataId)).toEqual(['Q41264', 'Q944834', 'Q3159680']);
   });
 });
