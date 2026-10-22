@@ -16,7 +16,7 @@ Mnemosyne, the goddess of memory and mother of the Muses, after whom the museum 
 
 | Area | What it does |
 | --- | --- |
-| **Salon** | Artwork of the day from your own collection, key figures, recently added, next trip, a greeting that depends on the time of day |
+| **Salon** | Artwork of the day from your own collection, key figures, what you are reading, recently added, next trip, a greeting that depends on the time of day |
 | **Collection** | Masonry gallery, **salon hang** (framed works on a coloured wall) and list view. Filter by status, favourites, period, artist, city, tag and **colour**. Custom lists, images via drag & drop |
 | **Artwork** | Large view with **deep zoom** (OpenSeadragon, IIIF), automatically extracted **colour palette**, the page accent colour adapts to the work, source and licence, related works |
 | **Photos** | Images are downscaled and stored locally. **EXIF** provides date and GPS; if a museum is nearby, the app suggests it (“Were you at the Albertina?”) |
@@ -24,8 +24,10 @@ Mnemosyne, the goddess of memory and mother of the Muses, after whom the museum 
 | **Journal** | Travel journal of all museum visits by year, with photos, impressions and companions |
 | **Planner** | Board with Idea, Planned and Done (drag & drop). Per trip: suggestions from **OpenStreetMap** with Wikipedia texts and images, a sortable watchlist, a map. Checked-off places can become a visit in the journal |
 | **Discover** | Combined search across Wikidata/Commons, Art Institute of Chicago, The Met and Cleveland Museum of Art (optionally Europeana and Harvard with a key). Add results as “seen” or “want to see” |
-| **People** | A page per artist with life dates, portrait, Wikipedia text and all their works; link to Wikidata in one step |
-| **Insights** | Countries, cities, visits, colour spectrum of all works seen, visits per year, periods, most-seen artists |
+| **Library** | Books on a shelf of covers (cloth bindings when there is none), reading status and progress, readings over the years, quotes, lending. Add by **ISBN scan**, ISBN or search in Open Library and the Deutsche Nationalbibliothek (Google Books with a key) |
+| **Lists** | Lists mix works and books, each with its own page and drag-and-drop order |
+| **People** | A page per artist or author with life dates, portrait, Wikipedia text and all their works and books; link to Wikidata in one step |
+| **Insights** | Countries, cities, visits, colour spectrum of all works seen, visits per year, periods, books read per year and pages, most collected people |
 | **Personalisation** | Light, dark or system; accent colours based on painting pigments or taken automatically from the artwork of the day; backgrounds: paper, five gradients, one of your works, your own image or the artwork of the day (blurred) |
 | **Data** | Everything stays local in the browser (IndexedDB), works offline (PWA), ZIP backup, JSON export for sharing, import |
 | **Languages** | German and English, with type-checked translation keys |
@@ -58,13 +60,14 @@ Settings → Data.
 ```
 apps/
   web/            PWA: React 19, TanStack Router + Query, Tailwind v4
-    src/modules/  one folder per area (home, art, travel): nav, quick add, dialogs, routes
+    src/modules/  one folder per area (home, art, library, people, travel): nav, quick add,
+                  dialogs, routes and the views of the collectible kinds it owns
     src/features/ the pages and forms the modules wire up
   embed-demo/     third-party sample page that embeds the widget
 packages/
   core/           data model (zod), repository contracts, domain logic – no React, no DB
   storage-dexie/  IndexedDB implementation of the store
-  providers/      adapters for museum APIs, geocoding, POIs, Wikipedia
+  providers/      adapters for museum APIs, book catalogues, geocoding, POIs, Wikipedia
   ui/             design system: tokens, Tailwind theme, components
   i18n/           de/en dictionaries + i18next setup
   embed/          <mnemo-gallery> web component (12 kB, no framework)
@@ -92,11 +95,14 @@ which run after the row transforms of the same step.
 
 **People.** Artworks keep `artist` as the attribution the museum gives (“Workshop of Rubens”)
 and link the people behind it through `creatorIds`. Creators can be linked to Wikidata for life
-dates, portrait and Wikipedia article; books will reuse them as authors.
+dates, portrait and Wikipedia article. Books link their authors the same way, so one person
+page shows a painter's works and the books they wrote.
 
-**Collectibles and lists.** Types that can be collected (today artworks) share
-`collectibleShape` (title, favourite, tags, notes, images, palette). Lists hold typed
-references `{ kind, id }`, so one list can mix artworks with future types such as books.
+**Collectibles and lists.** Types that can be collected (artworks, books) share
+`collectibleShape` (title, favourite, tags, notes, images, palette, creators). Lists hold typed
+references `{ kind, id }`, so one list mixes kinds. In the web app each module registers how
+its kinds look (`AppModule.collectibles`); people pages and list pages render any kind
+through these views without knowing it.
 
 **Domain rules** live in `packages/core/src/services`, for example “deleting a place also
 deletes its visits and unlinks its works” or “a completed trip item becomes a visit”. This
@@ -163,6 +169,8 @@ A new collection type such as books touches these places, in this order:
 1. **Model** – schemas in `packages/core/src/model/entities.ts` (spread `collectibleShape`), add
    the kind to `collectibleKinds`, register the table in `registry.ts` and `collectibleTables`.
    The compiler then points at every place that must handle the new kind (e.g. `subsetArchive`).
+   People, lists and backups work for it from here on. The library (`book`) is the worked
+   example.
 2. **Migration** – bump `SCHEMA_VERSION`, append a step to `migrations.ts` (`tables: {}` if no
    existing rows change) and add the new table's indexes under that version in `STORES`
    (`packages/storage-dexie/src/db.ts`). Tests check that versions and tables line up.
@@ -170,8 +178,10 @@ A new collection type such as books touches these places, in this order:
    Providers that need a key declare `requiresKey` and appear in the settings automatically.
 4. **UI** – pages and forms in `apps/web/src/features/<area>/`, then a module in
    `apps/web/src/modules/<area>/` with `index.ts` (nav, quick add, dialogs; dialog parameters
-   via `declare module '../../app/dialogs'`) and `routes.tsx`. Register it in
-   `src/modules/index.ts` and its routes in `src/app/router.tsx`.
+   via `declare module '../../app/dialogs'`, and `collectibles` with a card for the new kind)
+   and `routes.tsx`. Register it in `src/modules/index.ts` and its routes in
+   `src/app/router.tsx`. A kind without a card stops the app at startup, so it cannot be
+   forgotten.
 5. **Texts & release notes** – keys in `packages/i18n`, an entry in `apps/web/src/changelog.ts`
    (shown as “What's new”) and in `CHANGELOG.md`; bump the version in `apps/web/package.json`.
 
@@ -179,11 +189,14 @@ A new collection type such as books touches these places, in this order:
 
 Implement `ArtworkSearchProvider` in `packages/providers/src/art/` and register it in
 `artProviders` (`packages/providers/src/index.ts`). “Discover” then shows it automatically.
-Please test mapper functions against a real, trimmed API response in `test/fixtures/`.
+Book catalogues work the same way: implement `BookSearchProvider` (search and ISBN lookup) in
+`packages/providers/src/books/` and register it in `bookProviders`; the add dialog and
+`lookupIsbn` pick it up. Please test mapper functions against a real, trimmed API response in
+`test/fixtures/`.
 
 ## External services: notes from practice
 
-All services are free and require no account. The code handles a few quirks:
+All services are free; only Google Books needs a key of your own. The code handles a few quirks:
 
 - **The Met:** The old search API `v1/search` was shut down on October 1, 2026. Mnemo uses
   `v1.1/search`.
@@ -201,6 +214,13 @@ All services are free and require no account. The code handles a few quirks:
   browsers. In regular browsers they usually work. If not, Mnemo shows a typographic
   placeholder and stores only the link.
 - **Europeana / Harvard:** Get a free key and enter it in the settings.
+- **Google Books:** Anonymous requests get no quota any more (HTTP 429, daily limit 0), so it
+  only joins with your own key.
+- **Deutsche Nationalbibliothek:** The SRU interface answers in XML with CORS; `mat=books`
+  keeps archive material out of searches. Its cover service sends no CORS headers, so those
+  covers are linked, not stored. Open Library covers are stored for offline use.
+- **ISBN scan:** Needs camera access, so a secure origin (https or localhost). To try it on a
+  phone in development, serve over https.
 
 ## Privacy
 
@@ -214,8 +234,8 @@ is no server, there is no sync either, so back up your data regularly as a ZIP.
 The foundation (registry, migrations, typed lists, app modules) is in place for these steps:
 
 1. ~~**People:**~~ done in 0.3: creators linked to Wikidata.
-2. **Library:** a `book` collectible with Open Library and Google Books as sources, ISBN scan
-   via the camera, reading status, quotes and lending.
+2. ~~**Library:**~~ done in 0.4: books with ISBN scan, catalogues, reading status, quotes,
+   lending and lists that mix kinds.
 3. **More data:** further museum APIs (Rijksmuseum, V&A, Smithsonian), a `⌘K` search across all
    collectibles, `.ics` export of trips.
 4. **Hosting & sync:** static hosting first; then a `sync` package (e.g. Supabase) on top of the

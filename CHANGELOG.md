@@ -4,6 +4,35 @@ All notable changes to Mnemo. The format follows [Keep a Changelog](https://keep
 and the app uses [Semantic Versioning](https://semver.org/). User-facing release notes live in
 `apps/web/src/changelog.ts` and appear in the app under “What's new”.
 
+## [0.4.0] – 2026-10-23
+
+The library, and the first collectible kind beside artworks.
+
+### Added
+- **Books** (`books` table, schema 4): authors as printed plus `creatorIds`, ISBN-13, edition
+  data, reading status and ownership as separate axes, `readings` (start, finish, abandon),
+  `quotes` and the current `loan`, all inside the book document. Services in
+  `core/services/library.ts`: `saveBook`, `setReadingStatus`, `saveQuote`, `lendBook`,
+  `returnBook`, `removeBook`, `findBookByIsbn`, `filterBooks`.
+- ISBN helpers `normalizeIsbn` (ISBN-10 → ISBN-13, check digits) and `isbnFromBarcode`.
+- **Book catalogues** in `providers/src/books/`: Open Library and the Deutsche
+  Nationalbibliothek (SRU, Dublin Core) without key, Google Books with key. `lookupIsbn` merges
+  all usable catalogues field by field; `fetchText` for non-JSON APIs.
+- **Library module** (`/library`, `/book/$bookId`): shelf, reading band, filters as URL
+  params, detail page, add dialog with catalogue search, ISBN scanner (native
+  `BarcodeDetector` or the ZXing ponyfill with bundled, precached WebAssembly).
+- **Views across kinds:** modules register `collectibles` views; `useCollectibles()` loads all
+  kinds. New list page `/list/$collectionId` with drag-and-drop order.
+- Demo data includes books and a list that mixes works and books.
+
+### Changed
+- `creatorIds` moved into `collectibleShape`; `removeCreator`, `mergeDuplicateCreators` and
+  `topCreators` work across all collectible kinds. `resolveCreatorIds` keeps links for names
+  that stay.
+- The list dialog moved from the art to the home module; people pages render one section per
+  kind; insights and the salon include the library.
+- The mobile bar shows the library instead of Discover; page numbering shifted by one.
+
 ## [0.3.0] – 2026-10-22
 
 People behind the works, ready to be shared with a future library.

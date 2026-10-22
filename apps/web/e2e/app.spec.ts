@@ -269,3 +269,45 @@ test('a book found by ISBN goes on the shelf, gets read and quoted', async ({ pa
   await page.goto('/library?q=Glück');
   await expect(page.getByText('1 Buch')).toBeVisible();
 });
+
+test('a list mixes a work and a book, and their person shows both', async ({ page }) => {
+  await page.goto('/collection');
+  await page.getByRole('button', { name: 'Erstes Werk hinzufügen' }).click();
+  const artwork = page.getByRole('dialog');
+  await artwork.getByLabel('Titel').fill('Melencolia I');
+  await artwork.getByLabel('Künstler:in').fill('Albrecht Dürer');
+  await artwork.getByRole('button', { name: 'Speichern' }).click();
+  await expect(artwork).toBeHidden();
+
+  // A new list from the artwork's menu holds the artwork right away.
+  await page.getByText('Melencolia I').first().click();
+  await page.getByRole('button', { name: 'Weitere Aktionen' }).click();
+  await page.getByRole('menuitem', { name: 'Neue Liste' }).click();
+  const list = page.getByRole('dialog');
+  await list.getByLabel('Name').fill('Nürnberg');
+  await list.getByRole('button', { name: 'Speichern' }).click();
+  await expect(list).toBeHidden();
+
+  await page.goto('/library');
+  await page.getByRole('button', { name: 'Von Hand eintragen' }).click();
+  const book = page.getByRole('dialog');
+  await book.getByLabel('Titel', { exact: true }).fill('Underweysung der Messung');
+  await book.getByLabel('Autor:innen').fill('Albrecht Dürer');
+  await book.getByLabel('Autor:innen').press('Enter');
+  await book.getByRole('button', { name: 'Nürnberg' }).click();
+  await book.getByRole('button', { name: 'Speichern' }).click();
+  await expect(book).toBeHidden();
+
+  await page.getByRole('link', { name: /Underweysung der Messung/ }).click();
+  await page.getByRole('link', { name: 'Nürnberg' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Nürnberg' })).toBeVisible();
+  await expect(page.getByText('Liste · 1 Werk · 1 Buch')).toBeVisible();
+  await expect(page.getByText('Melencolia I').first()).toBeVisible();
+  await expect(page.getByText('Underweysung der Messung').first()).toBeVisible();
+
+  await page.getByRole('link', { name: /Underweysung der Messung/ }).click();
+  await page.getByRole('link', { name: 'Albrecht Dürer', exact: true }).click();
+  await expect(page.getByText('1 Werk in deiner Sammlung')).toBeVisible();
+  await expect(page.getByText('1 Buch in deiner Bibliothek')).toBeVisible();
+  await expect(page.getByText('Person', { exact: true })).toBeVisible();
+});

@@ -21,6 +21,47 @@ export interface Release {
 
 export const releases: readonly Release[] = [
   {
+    version: '0.4.0',
+    date: '2026-10-23',
+    entries: [
+      {
+        kind: 'new',
+        de: 'Die Bibliothek: deine Bücher im Regal, mit Lesestatus, Seitenfortschritt, Bewertung und allen Lesedurchgängen.',
+        en: 'The library: your books on the shelf, with reading status, page progress, rating and every reading.',
+      },
+      {
+        kind: 'new',
+        de: 'Bücher per ISBN-Scan mit der Kamera, über die ISBN oder per Suche in Open Library und der Deutschen Nationalbibliothek hinzufügen. Google Books kommt mit einem eigenen Schlüssel dazu.',
+        en: 'Add books by scanning the ISBN with your camera, by typing it, or by searching Open Library and the German National Library. Google Books joins with a key of your own.',
+      },
+      {
+        kind: 'new',
+        de: 'Zitate festhalten, mit Seitenzahl und eigenem Gedanken. Sie sind auch über die Suche der Bibliothek auffindbar.',
+        en: 'Keep quotes with page number and your own thought; the library search finds them too.',
+      },
+      {
+        kind: 'new',
+        de: 'Verleihen: Mnemo merkt sich, wer welches Buch hat und bis wann.',
+        en: 'Lending: Mnemo remembers who has which book and until when.',
+      },
+      {
+        kind: 'new',
+        de: 'Listen haben eine eigene Seite und können Werke und Bücher mischen. Die Reihenfolge lässt sich per Ziehen ändern.',
+        en: 'Lists have their own page and can mix works and books; drag to change the order.',
+      },
+      {
+        kind: 'improved',
+        de: 'Personenseiten zeigen Werke und Bücher. Der Salon zeigt, was du gerade liest, und die Bilanz hat einen eigenen Abschnitt für die Bibliothek.',
+        en: 'People pages show works and books; the salon shows what you are reading and insights gain a library section.',
+      },
+      {
+        kind: 'improved',
+        de: '„Entdecken“ findest du auf dem Handy jetzt unter „Mehr“; die Bibliothek hat ihren Platz in der unteren Leiste.',
+        en: 'On phones, “Discover” now lives under “More”; the library takes its place in the bottom bar.',
+      },
+    ],
+  },
+  {
     version: '0.3.0',
     date: '2026-10-22',
     entries: [
