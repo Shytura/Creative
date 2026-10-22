@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Mnemo</title>
+  <rect width="512" height="512" rx="96" fill="#1c1915"/>
+  <path d="M152 392V236a104 104 0 0 1 208 0v156" fill="none" stroke="#f3eee5" stroke-width="22"/>
+  <path d="M196 392V244a60 60 0 0 1 120 0v148" fill="none" stroke="#f3eee5" stroke-width="10" opacity=".55"/>
+  <circle cx="256" cy="236" r="22" fill="#e1906a"/>
+  <path d="M120 392h272" stroke="#f3eee5" stroke-width="22" stroke-linecap="round"/>
+</svg>

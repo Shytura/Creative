@@ -1,0 +1,131 @@
+/*
+ * Tailwind v4 theme bridge. Import after `tailwindcss` and add
+ * `@source "<path-to>/packages/ui/src";` so component classes are generated.
+ */
+@import "./tokens.css";
+
+@theme inline {
+  --color-paper: var(--mn-paper);
+  --color-paper-2: var(--mn-paper-2);
+  --color-surface: var(--mn-surface);
+  --color-ink: var(--mn-ink);
+  --color-ink-2: var(--mn-ink-2);
+  --color-ink-3: var(--mn-ink-3);
+  --color-line: var(--mn-line);
+  --color-line-strong: var(--mn-line-strong);
+  --color-accent: var(--mn-accent);
+  --color-accent-ink: var(--mn-accent-ink);
+  --color-accent-soft: var(--mn-accent-soft);
+  --color-gold: var(--mn-gold);
+  --color-danger: var(--mn-danger);
+  --color-overlay: var(--mn-overlay);
+
+  --font-display: var(--mn-font-display);
+  --font-sans: var(--mn-font-sans);
+
+  --shadow-soft: var(--mn-shadow-sm);
+  --shadow-frame: var(--mn-shadow);
+  --shadow-float: var(--mn-shadow-lg);
+
+  --radius-frame: var(--mn-radius);
+  --ease-gallery: var(--mn-ease);
+}
+
+@theme {
+  --animate-rise: rise 0.7s var(--mn-ease) both;
+  --animate-fade: fade 0.4s ease both;
+  --animate-slide-right: slide-right 0.5s var(--mn-ease) both;
+  --animate-slide-left: slide-left 0.5s var(--mn-ease) both;
+
+  @keyframes slide-right {
+    from {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes slide-left {
+    from {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@utility display {
+  font-family: var(--mn-font-display);
+  font-optical-sizing: auto;
+  font-variation-settings:
+    "SOFT" 30,
+    "WONK" 0;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+
+@utility eyebrow {
+  font-family: var(--mn-font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@utility caption {
+  font-family: var(--mn-font-display);
+  font-style: italic;
+  font-variation-settings: "SOFT" 100;
+}
+
+@utility hairline {
+  border-color: var(--mn-line);
+}
+
+@layer base {
+  html {
+    background: var(--mn-paper);
+    color: var(--mn-ink);
+    font-family: var(--mn-font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  ::selection {
+    background: var(--mn-accent);
+    color: var(--mn-accent-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--mn-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

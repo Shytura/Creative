@@ -1,0 +1,48 @@
+/*
+ * Mnemo design tokens. Raw values live in --mn-* custom properties so host apps can
+ * re-theme the components by overriding them on any ancestor element.
+ */
+
+:root,
+[data-theme="light"] {
+  --mn-paper: #f3eee5;
+  --mn-paper-2: #e9e2d5;
+  --mn-surface: #faf7f1;
+  --mn-ink: #1c1915;
+  --mn-ink-2: #4b443c;
+  --mn-ink-3: #6f675d;
+  --mn-line: color-mix(in oklab, var(--mn-ink) 13%, transparent);
+  --mn-line-strong: color-mix(in oklab, var(--mn-ink) 26%, transparent);
+  --mn-accent: #a4462f;
+  --mn-accent-ink: #faf7f1;
+  --mn-accent-soft: color-mix(in oklab, var(--mn-accent) 12%, transparent);
+  --mn-gold: #9c7a45;
+  --mn-danger: #a3271d;
+  --mn-overlay: color-mix(in oklab, #14110d 45%, transparent);
+  --mn-shadow-sm: 0 1px 2px rgb(28 25 21 / 0.06), 0 2px 8px -4px rgb(28 25 21 / 0.1);
+  --mn-shadow: 0 1px 2px rgb(28 25 21 / 0.05), 0 12px 32px -12px rgb(28 25 21 / 0.22);
+  --mn-shadow-lg: 0 30px 80px -24px rgb(28 25 21 / 0.4);
+  --mn-radius: 3px;
+  --mn-font-display: "Fraunces Variable", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --mn-font-sans: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --mn-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --mn-paper: #12110f;
+  --mn-paper-2: #0c0b0a;
+  --mn-surface: #1b1917;
+  --mn-ink: #ede7dd;
+  --mn-ink-2: #c2b9ad;
+  --mn-ink-3: #8f877c;
+  --mn-accent: #e1906a;
+  --mn-accent-ink: #1c1915;
+  --mn-gold: #c9a56b;
+  --mn-danger: #f07a6e;
+  --mn-overlay: color-mix(in oklab, #000 62%, transparent);
+  --mn-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --mn-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px -12px rgb(0 0 0 / 0.6);
+  --mn-shadow-lg: 0 30px 80px -24px rgb(0 0 0 / 0.8);
+  color-scheme: dark;
+}

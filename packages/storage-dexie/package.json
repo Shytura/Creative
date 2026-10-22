@@ -1,0 +1,17 @@
+{
+  "name": "@mnemo/storage-dexie",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "IndexedDB implementation of the Mnemo store, built on Dexie.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@mnemo/core": "workspace:*",
+    "dexie": "^4.4.6"
+  }
+}

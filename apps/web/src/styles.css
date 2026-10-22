@@ -1,0 +1,91 @@
+@import "tailwindcss";
+@import "@fontsource-variable/fraunces/full.css";
+@import "@fontsource-variable/fraunces/full-italic.css";
+@import "@fontsource-variable/instrument-sans/standard.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
+@import "@mnemo/ui/theme.css";
+
+@source "../../../packages/ui/src";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@layer base {
+  /* Keep focused and scrolled-to elements clear of the sticky header and the mobile tab bar. */
+  html {
+    scroll-padding-top: 5.5rem;
+    scroll-padding-bottom: 7rem;
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      scroll-padding-bottom: 2rem;
+    }
+  }
+
+  body {
+    min-height: 100dvh;
+    background: transparent;
+  }
+
+  /* Masonry columns keep each figure intact. */
+  .masonry > * {
+    break-inside: avoid;
+  }
+}
+
+/* MapLibre popups and controls in gallery style. */
+.maplibregl-popup-content {
+  background: var(--mn-surface);
+  color: var(--mn-ink);
+  border: 1px solid var(--mn-line);
+  border-radius: var(--mn-radius);
+  box-shadow: var(--mn-shadow);
+  padding: 0;
+  font-family: var(--mn-font-sans);
+}
+
+.maplibregl-popup-tip {
+  display: none;
+}
+
+.maplibregl-popup-close-button {
+  color: var(--mn-ink-3);
+  font-size: 18px;
+  padding: 2px 8px;
+}
+
+.maplibregl-ctrl-group {
+  background: var(--mn-surface) !important;
+  border: 1px solid var(--mn-line) !important;
+  border-radius: var(--mn-radius) !important;
+  box-shadow: var(--mn-shadow-sm) !important;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top-color: var(--mn-line) !important;
+}
+
+[data-theme="dark"] .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
+
+.maplibregl-ctrl-attrib {
+  background: color-mix(in oklab, var(--mn-surface) 80%, transparent) !important;
+  font-size: 10px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--mn-ink-3) !important;
+}
+
+/* Smooth cross-fade for route changes (View Transitions API). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+  animation-timing-function: var(--mn-ease);
+}
+
+::view-transition-group(artwork-hero) {
+  animation-duration: 0.5s;
+  animation-timing-function: var(--mn-ease);
+}

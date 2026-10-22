@@ -1,0 +1,258 @@
+{
+ "format": "mnemo-archive",
+ "version": 1,
+ "exportedAt": "2026-10-21T12:00:00.000Z",
+ "places": [
+  {
+   "id": "p-wien",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "name": "Wien",
+   "country": "Österreich",
+   "countryCode": "AT",
+   "coords": {
+    "lat": 48.2083,
+    "lng": 16.3725
+   },
+   "notes": ""
+  },
+  {
+   "id": "p-ams",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "name": "Amsterdam",
+   "country": "Niederlande",
+   "countryCode": "NL",
+   "coords": {
+    "lat": 52.3731,
+    "lng": 4.8924
+   },
+   "notes": ""
+  },
+  {
+   "id": "p-paris",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "name": "Paris",
+   "country": "Frankreich",
+   "countryCode": "FR",
+   "coords": {
+    "lat": 48.8566,
+    "lng": 2.3522
+   },
+   "notes": ""
+  }
+ ],
+ "venues": [
+  {
+   "id": "v-belv",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "placeId": "p-wien",
+   "kind": "museum",
+   "name": "Oberes Belvedere",
+   "notes": ""
+  },
+  {
+   "id": "v-khm",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "placeId": "p-wien",
+   "kind": "museum",
+   "name": "Kunsthistorisches Museum",
+   "notes": ""
+  },
+  {
+   "id": "v-rijks",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "placeId": "p-ams",
+   "kind": "museum",
+   "name": "Rijksmuseum",
+   "notes": ""
+  },
+  {
+   "id": "v-marm",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "placeId": "p-paris",
+   "kind": "museum",
+   "name": "Musée Marmottan Monet",
+   "notes": ""
+  }
+ ],
+ "visits": [],
+ "artworks": [
+  {
+   "id": "a1",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "title": "Der Kuss",
+   "artist": "Gustav Klimt",
+   "year": "1908–1909",
+   "status": "seen",
+   "venueId": "v-belv",
+   "notes": "Die Blumenwiese am Rand ist mein Lieblingsdetail.",
+   "tags": [],
+   "favorite": true,
+   "mediaIds": [
+    "m-a1"
+   ],
+   "palette": []
+  },
+  {
+   "id": "a2",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "title": "Turmbau zu Babel",
+   "artist": "Pieter Bruegel d. Ä.",
+   "year": "1563",
+   "status": "seen",
+   "venueId": "v-khm",
+   "notes": "",
+   "tags": [],
+   "favorite": true,
+   "mediaIds": [
+    "m-a2"
+   ],
+   "palette": []
+  },
+  {
+   "id": "a3",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "title": "Das Milchmädchen",
+   "artist": "Johannes Vermeer",
+   "year": "um 1660",
+   "status": "seen",
+   "venueId": "v-rijks",
+   "notes": "",
+   "tags": [],
+   "favorite": true,
+   "mediaIds": [
+    "m-a3"
+   ],
+   "palette": []
+  },
+  {
+   "id": "a4",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "title": "Die Nachtwache",
+   "artist": "Rembrandt van Rijn",
+   "year": "1642",
+   "status": "seen",
+   "venueId": "v-rijks",
+   "notes": "",
+   "tags": [],
+   "favorite": false,
+   "mediaIds": [
+    "m-a4"
+   ],
+   "palette": []
+  },
+  {
+   "id": "a5",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "title": "Impression, Sonnenaufgang",
+   "artist": "Claude Monet",
+   "year": "1872",
+   "status": "seen",
+   "venueId": "v-marm",
+   "notes": "",
+   "tags": [],
+   "favorite": true,
+   "mediaIds": [
+    "m-a5"
+   ],
+   "palette": []
+  }
+ ],
+ "collections": [
+  {
+   "id": "c-fav",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "name": "Lieblingswerke",
+   "description": "Werke, zu denen ich immer wieder zurückkehre.",
+   "artworkIds": [
+    "a1",
+    "a2",
+    "a3",
+    "a5"
+   ]
+  }
+ ],
+ "trips": [],
+ "media": [
+  {
+   "id": "m-a1",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "mime": "image/jpeg",
+   "remoteUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Kiss%20-%20Gustav%20Klimt%20-%20Google%20Cultural%20Institute.jpg?width=800",
+   "hasBlob": false,
+   "palette": [],
+   "src": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Kiss%20-%20Gustav%20Klimt%20-%20Google%20Cultural%20Institute.jpg?width=800"
+  },
+  {
+   "id": "m-a2",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "mime": "image/jpeg",
+   "remoteUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pieter%20Bruegel%20the%20Elder%20-%20The%20Tower%20of%20Babel%20%28Vienna%29%20-%20Google%20Art%20Project%20-%20edited.jpg?width=800",
+   "hasBlob": false,
+   "palette": [],
+   "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Pieter%20Bruegel%20the%20Elder%20-%20The%20Tower%20of%20Babel%20%28Vienna%29%20-%20Google%20Art%20Project%20-%20edited.jpg?width=800"
+  },
+  {
+   "id": "m-a3",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "mime": "image/jpeg",
+   "remoteUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Johannes%20Vermeer%20-%20Het%20melkmeisje%20-%20Google%20Art%20Project.jpg?width=800",
+   "hasBlob": false,
+   "palette": [],
+   "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Johannes%20Vermeer%20-%20Het%20melkmeisje%20-%20Google%20Art%20Project.jpg?width=800"
+  },
+  {
+   "id": "m-a4",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "mime": "image/jpeg",
+   "remoteUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Night%20Watch%20-%20HD.jpg?width=800",
+   "hasBlob": false,
+   "palette": [],
+   "src": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Night%20Watch%20-%20HD.jpg?width=800"
+  },
+  {
+   "id": "m-a5",
+   "createdAt": "2026-10-21T12:00:00.000Z",
+   "updatedAt": "2026-10-21T12:00:00.000Z",
+   "schemaVersion": 1,
+   "mime": "image/jpeg",
+   "remoteUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Monet%20-%20Impression%2C%20Sunrise.jpg?width=800",
+   "hasBlob": false,
+   "palette": [],
+   "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Monet%20-%20Impression%2C%20Sunrise.jpg?width=800"
+  }
+ ]
+}

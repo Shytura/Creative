@@ -1,0 +1,16 @@
+{
+  "name": "@mnemo/embed-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A plain host page that embeds <mnemo-gallery>, as any third-party website would.",
+  "scripts": {
+    "dev": "vite --port 5174",
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@mnemo/embed": "workspace:*",
+    "vite": "^8.3.4"
+  }
+}

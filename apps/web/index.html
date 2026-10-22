@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Mnemo – dein persönliches Gedächtnis für Kunst, Museen und Reisen." />
+    <meta name="theme-color" content="#f3eee5" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Mnemo</title>
+    <script>
+      // Apply the last resolved theme before first paint to avoid a flash.
+      (() => {
+        try {
+          const theme = localStorage.getItem('mnemo:theme');
+          if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Embed-Demo · Mnemo</title>
+    <style>
+      body {
+        margin: 0;
+        font: 16px/1.6 system-ui, sans-serif;
+        color: #222;
+        background: #fff;
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 48px 24px 96px;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 0 0 8px;
+      }
+      p.intro {
+        color: #555;
+        margin: 0 0 40px;
+      }
+      code {
+        background: #f3f3f3;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      section {
+        margin-bottom: 64px;
+      }
+      #log {
+        font: 13px ui-monospace, monospace;
+        color: #777;
+        margin-top: 12px;
+      }
+      /* Host pages can restyle the widget through its custom properties. */
+      .teal {
+        --mnemo-accent: #1f6f74;
+        --mnemo-columns: 4;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Mein Kunstblog</h1>
+      <p class="intro">
+        Diese Seite steht für eine beliebige fremde Webseite. Sie bindet das Widget mit einer
+        Zeile ein und liest einen JSON-Export aus Mnemo (Einstellungen → Daten → „Zum Teilen &amp;
+        Einbetten“).
+      </p>
+
+      <section>
+        <mnemo-gallery src="/sample-collection.json" collection="Lieblingswerke" theme="auto" columns="3"></mnemo-gallery>
+        <p id="log">Klicke ein Werk an …</p>
+      </section>
+
+      <section>
+        <h2>Dunkles Thema, eigene Akzentfarbe, nur zwei Werke</h2>
+        <mnemo-gallery class="teal" src="/sample-collection.json" theme="dark" limit="2" heading="Zuletzt gesehen" lang="de"></mnemo-gallery>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

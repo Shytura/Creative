@@ -1,0 +1,97 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "osm_type": "R",
+    "osm_id": 109166,
+    "osm_key": "place",
+    "osm_value": "city",
+    "type": "city",
+    "name": "Wien",
+    "country": "Österreich",
+    "countrycode": "AT",
+    "extra": {
+     "admin_level": "4"
+    },
+    "extent": [
+     16.181831,
+     48.3226679,
+     16.5775132,
+     48.1179069
+    ]
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     16.3725042,
+     48.2083537
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "osm_type": "R",
+    "osm_id": 110451,
+    "osm_key": "place",
+    "osm_value": "town",
+    "type": "city",
+    "name": "Wiener Neustadt",
+    "state": "Niederösterreich",
+    "country": "Österreich",
+    "postcode": "2700",
+    "countrycode": "AT",
+    "extra": {
+     "admin_level": "6"
+    },
+    "extent": [
+     16.1465067,
+     47.8715706,
+     16.2858954,
+     47.7426825
+    ]
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     16.2441166,
+     47.8131847
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "osm_type": "R",
+    "osm_id": 3353156,
+    "osm_key": "place",
+    "osm_value": "village",
+    "type": "city",
+    "name": "Wiencourt-l'Équipée",
+    "county": "Somme",
+    "state": "Nordfrankreich",
+    "country": "Frankreich",
+    "postcode": "80170",
+    "countrycode": "FR",
+    "extra": {
+     "admin_level": "8"
+    },
+    "extent": [
+     2.5900902,
+     49.857947,
+     2.6220979,
+     49.8219431
+    ]
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     2.6116835,
+     49.8459589
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,43 @@
+{
+ "data": [
+  {
+   "_score": 132.43301,
+   "id": 16568,
+   "title": "Water Lilies",
+   "thumbnail": {
+    "lqip": "data:image/gif;base64,R0lGODlhBQAFAPQAAEZcaFFfdVtqbk9ldFBlcVFocllrcFlrd11rdl9sdFZtf15wcWV0d2R2eGByfmd6eGl6e2t9elZxiGF4kWB4kmJ9kGJ8lWeCkWSAnQAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAAFAAUAAAUVoJBADXI4TLRMWHU9hmRRCjAURBACADs=",
+    "width": 8808,
+    "height": 8460,
+    "alt_text": "Painting of a pond seen up close spotted with thickly painted pink and white water lilies and a shadow across the top third of the picture."
+   },
+   "date_display": "1906",
+   "artist_display": "Claude Monet (French, 1840–1926)",
+   "place_of_origin": "France",
+   "medium_display": "Oil on canvas",
+   "is_public_domain": true,
+   "artist_title": "Claude Monet",
+   "image_id": "3c27b499-af56-f0d5-93b5-a7f2f1ad5813"
+  },
+  {
+   "_score": 122.699615,
+   "id": 16571,
+   "title": "Arrival of the Normandy Train, Gare Saint-Lazare",
+   "thumbnail": {
+    "lqip": "data:image/gif;base64,R0lGODlhBwAFAPUAADU8QkROS0ZPU0hSVk1YXVFWUlBXXlFaWVNcWFFkV1plVVtjWmBnWmFqXmRrX05ZYFFaYlljbF5qbGNsY2ZydmlzdWRxeGdze2l1fWx3fG16enJ4fH+KioWOkZeam5yjqZ2lqrG1ubS6vwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAAHAAUAAAYhQIKmYslQDoONp8ORBECi0OfyKEAMmAhAgFhMHA2GIhEEADs=",
+    "width": 6786,
+    "height": 5092,
+    "alt_text": "Loosely painted image of an open-air train station. On the right, a parked train gives off an enormous plumb of white smoke, making the scene look as though it were full of clouds. A huddled mass of barely discernible people crowd around the train on both sides of the tracks. Blue, green, and gray tones dominate."
+   },
+   "date_display": "1877",
+   "artist_display": "Claude Monet (French, 1840–1926)",
+   "place_of_origin": "France",
+   "medium_display": "Oil on canvas",
+   "is_public_domain": true,
+   "artist_title": "Claude Monet",
+   "image_id": "0f1cc0e0-e42e-be16-3f71-2022da38cb93"
+  }
+ ],
+ "config": {
+  "iiif_url": "https://www.artic.edu/iiif/2"
+ }
+}

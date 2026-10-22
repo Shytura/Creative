@@ -1,0 +1,27 @@
+{
+  "name": "mnemo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @mnemo/web dev",
+    "dev:embed": "pnpm --filter @mnemo/embed-demo dev",
+    "build": "pnpm --filter @mnemo/embed build && pnpm --filter @mnemo/web build",
+    "preview": "pnpm --filter @mnemo/web preview",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "e2e": "pnpm --filter @mnemo/web e2e",
+    "check": "pnpm lint && pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "fake-indexeddb": "^6.2.6",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

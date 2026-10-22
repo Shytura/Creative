@@ -1,0 +1,16 @@
+{
+  "name": "@mnemo/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Translations (de, en) and i18next setup for Mnemo.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "i18next": "^26.5.3"
+  }
+}
