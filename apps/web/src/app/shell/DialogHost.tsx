@@ -1,11 +1,10 @@
-import { type ReactNode, useMemo, useState } from 'react';
-import { ArtworkFormDialog } from '../../features/artworks/ArtworkForm';
-import { CollectionFormDialog } from '../../features/artworks/CollectionForm';
-import { PlaceFormDialog } from '../../features/places/PlaceForm';
-import { VenueFormDialog } from '../../features/places/VenueForm';
-import { VisitFormDialog } from '../../features/places/VisitForm';
-import { TripFormDialog } from '../../features/planner/TripForm';
-import { type DialogApi, DialogContext, type DialogSpec } from '../dialogs';
+import { type ComponentType, type ReactNode, Suspense, useMemo, useState } from 'react';
+import { dialogComponents } from '../../modules';
+import { type DialogApi, DialogContext, type DialogProps, type DialogSpec } from '../dialogs';
+
+type AnyDialog = ComponentType<
+  Omit<DialogProps<DialogSpec['type']>, 'spec'> & { spec: DialogSpec }
+>;
 
 export function DialogHost({ children }: { children: ReactNode }) {
   const [spec, setSpec] = useState<DialogSpec | null>(null);
@@ -23,18 +22,15 @@ export function DialogHost({ children }: { children: ReactNode }) {
     [],
   );
 
-  const onClose = api.close;
+  const Dialog = spec ? (dialogComponents[spec.type] as AnyDialog | undefined) : undefined;
 
   return (
     <DialogContext.Provider value={api}>
       {children}
-      {spec?.type === 'artwork' && <ArtworkFormDialog key={nonce} spec={spec} onClose={onClose} />}
-      {spec?.type === 'visit' && <VisitFormDialog key={nonce} spec={spec} onClose={onClose} />}
-      {spec?.type === 'venue' && <VenueFormDialog key={nonce} spec={spec} onClose={onClose} />}
-      {spec?.type === 'place' && <PlaceFormDialog key={nonce} spec={spec} onClose={onClose} />}
-      {spec?.type === 'trip' && <TripFormDialog key={nonce} spec={spec} onClose={onClose} />}
-      {spec?.type === 'collection' && (
-        <CollectionFormDialog key={nonce} spec={spec} onClose={onClose} />
+      {spec && Dialog && (
+        <Suspense fallback={null}>
+          <Dialog key={nonce} spec={spec} onClose={api.close} />
+        </Suspense>
       )}
     </DialogContext.Provider>
   );

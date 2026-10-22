@@ -10,40 +10,21 @@ import {
   Tooltip,
 } from '@mnemo/ui';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
-import {
-  BookOpenIcon,
-  ChartNoAxesColumnIcon,
-  CompassIcon,
-  EllipsisIcon,
-  ImagesIcon,
-  LandmarkIcon,
-  MapIcon,
-  MapPinIcon,
-  PlusIcon,
-  SearchIcon,
-  Settings2Icon,
-  StampIcon,
-} from 'lucide-react';
-import { type ComponentType, useEffect } from 'react';
+import { EllipsisIcon, PlusIcon, Settings2Icon } from 'lucide-react';
+import { Fragment, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { WhatsNewOnUpdate } from '../../features/whats-new/WhatsNew';
+import { navEntries, quickAddEntries } from '../../modules';
 import { useDialogs } from '../dialogs';
 import { Background } from './Appearance';
 import { DialogHost } from './DialogHost';
 
-type NavKey = 'salon' | 'collection' | 'atlas' | 'journal' | 'planner' | 'discover';
-
-const NAV: Array<{ to: string; key: NavKey; icon: ComponentType<{ className?: string }> }> = [
-  { to: '/', key: 'salon', icon: LandmarkIcon },
-  { to: '/collection', key: 'collection', icon: ImagesIcon },
-  { to: '/atlas', key: 'atlas', icon: MapIcon },
-  { to: '/journal', key: 'journal', icon: BookOpenIcon },
-  { to: '/planner', key: 'planner', icon: CompassIcon },
-  { to: '/discover', key: 'discover', icon: SearchIcon },
-];
-
-const MOBILE_NAV = NAV.filter((n) => n.key !== 'journal');
+const MAIN_NAV = navEntries.filter((n) => n.placement === 'main');
+const SECONDARY_NAV = navEntries.filter((n) => n.placement === 'secondary');
+const MOBILE_NAV = MAIN_NAV.filter((n) => n.mobile);
+/** Reachable through the "more" menu on small screens. */
+const MORE_NAV = [...MAIN_NAV.filter((n) => !n.mobile), ...SECONDARY_NAV];
 
 export function AppShell() {
   return (
@@ -80,7 +61,7 @@ function Layout() {
             aria-label={t('nav.label')}
             className="hidden flex-1 items-center justify-center gap-1 lg:flex"
           >
-            {NAV.map((item) => (
+            {MAIN_NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -89,7 +70,7 @@ function Layout() {
               >
                 {({ isActive }) => (
                   <>
-                    {t(`nav.${item.key}`)}
+                    {t(`nav.${item.navKey}`)}
                     <span
                       className={cn(
                         'absolute inset-x-3 -bottom-[13px] h-px origin-left bg-accent transition-transform duration-500 ease-gallery',
@@ -104,13 +85,15 @@ function Layout() {
 
           <div className="ml-auto flex items-center gap-1 lg:ml-0">
             <QuickAdd />
-            <Tooltip content={t('nav.insights')}>
-              <Button asChild variant="ghost" size="icon" className="hidden sm:inline-flex">
-                <Link to="/insights" aria-label={t('nav.insights')}>
-                  <ChartNoAxesColumnIcon />
-                </Link>
-              </Button>
-            </Tooltip>
+            {SECONDARY_NAV.map((item) => (
+              <Tooltip key={item.to} content={t(`nav.${item.navKey}`)}>
+                <Button asChild variant="ghost" size="icon" className="hidden sm:inline-flex">
+                  <Link to={item.to} aria-label={t(`nav.${item.navKey}`)}>
+                    <item.icon />
+                  </Link>
+                </Button>
+              </Tooltip>
+            ))}
             <Tooltip content={t('nav.settings')}>
               <Button asChild variant="ghost" size="icon">
                 <Link to="/settings" aria-label={t('nav.settings')}>
@@ -130,16 +113,13 @@ function Layout() {
                 </Button>
               </MenuTrigger>
               <MenuContent align="end">
-                <MenuItem asChild>
-                  <Link to="/journal">
-                    <BookOpenIcon /> {t('nav.journal')}
-                  </Link>
-                </MenuItem>
-                <MenuItem asChild>
-                  <Link to="/insights">
-                    <ChartNoAxesColumnIcon /> {t('nav.insights')}
-                  </Link>
-                </MenuItem>
+                {MORE_NAV.map((item) => (
+                  <MenuItem key={item.to} asChild>
+                    <Link to={item.to}>
+                      <item.icon /> {t(`nav.${item.navKey}`)}
+                    </Link>
+                  </MenuItem>
+                ))}
               </MenuContent>
             </Menu>
           </div>
@@ -178,7 +158,7 @@ function Layout() {
             className="flex flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-ink-3 transition-colors data-[status=active]:text-accent"
           >
             <item.icon className="size-5" />
-            <span className="text-[0.625rem] font-medium">{t(`nav.${item.key}`)}</span>
+            <span className="text-[0.625rem] font-medium">{t(`nav.${item.navKey}`)}</span>
           </Link>
         ))}
       </nav>
@@ -197,19 +177,14 @@ function QuickAdd() {
         </Button>
       </MenuTrigger>
       <MenuContent align="end">
-        <MenuItem onSelect={() => dialogs.open({ type: 'artwork' })}>
-          <ImagesIcon /> {t('quickAdd.artwork')}
-        </MenuItem>
-        <MenuItem onSelect={() => dialogs.open({ type: 'visit' })}>
-          <StampIcon /> {t('quickAdd.visit')}
-        </MenuItem>
-        <MenuItem onSelect={() => dialogs.open({ type: 'venue' })}>
-          <MapPinIcon /> {t('quickAdd.venue')}
-        </MenuItem>
-        <MenuSeparator />
-        <MenuItem onSelect={() => dialogs.open({ type: 'trip' })}>
-          <CompassIcon /> {t('quickAdd.trip')}
-        </MenuItem>
+        {quickAddEntries.map((item, i) => (
+          <Fragment key={item.quickAddKey}>
+            {i > 0 && quickAddEntries[i - 1]?.group !== item.group && <MenuSeparator />}
+            <MenuItem onSelect={() => dialogs.open(item.dialog)}>
+              <item.icon /> {t(`quickAdd.${item.quickAddKey}`)}
+            </MenuItem>
+          </Fragment>
+        ))}
       </MenuContent>
     </Menu>
   );

@@ -39,10 +39,10 @@ import { type DragEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useArtworks, useCollections, useLookups } from '../../app/data';
 import { useDialogs } from '../../app/dialogs';
-import type { CollectionSearch } from '../../app/router';
 import { ArtworkCard } from '../../components/ArtworkCard';
 import { MediaImage } from '../../components/MediaImage';
 import { useFormat } from '../../lib/format';
+import type { CollectionSearch } from './search';
 
 const routeApi = getRouteApi('/collection');
 
