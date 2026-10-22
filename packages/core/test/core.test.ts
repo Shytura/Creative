@@ -5,20 +5,31 @@ import {
   archiveToSnapshot,
   artworkOfTheDay,
   artworkSchema,
+  collectibleKinds,
+  collectibleTables,
+  collectionHas,
+  collectionSchema,
   colorDistance,
   computeInsights,
   contrastRatio,
   createArchive,
   distanceKm,
+  emptySnapshot,
   ensureContrast,
+  entityNames,
   epochOf,
   filterArtworks,
   flagEmoji,
+  itemIdsOf,
+  migrateRow,
+  migrations,
+  NewerSchemaError,
   nearby,
   type Place,
   parseArchive,
   parseYear,
   placeSchema,
+  SCHEMA_VERSION,
   settingsSchema,
   sortByHue,
   subsetArchive,
@@ -48,7 +59,7 @@ describe('schemas', () => {
     const a = artwork('a1');
     expect(a.status).toBe('seen');
     expect(a.tags).toEqual([]);
-    expect(a.schemaVersion).toBe(1);
+    expect(a.schemaVersion).toBe(SCHEMA_VERSION);
   });
 
   it('rejects invalid dates and colours', () => {
@@ -168,7 +179,16 @@ describe('queries', () => {
 
   it('respects collection order', () => {
     const collections = [
-      { ...meta('c1'), schemaVersion: 1, name: 'Liste', description: '', artworkIds: ['a3', 'a1'] },
+      {
+        ...meta('c1'),
+        schemaVersion: 2,
+        name: 'Liste',
+        description: '',
+        items: [
+          { kind: 'artwork' as const, id: 'a3' },
+          { kind: 'artwork' as const, id: 'a1' },
+        ],
+      },
     ];
     expect(
       filterArtworks(artworks, { collectionId: 'c1' }, { venues, collections }).map((a) => a.id),
@@ -238,7 +258,15 @@ describe('archive', () => {
     ],
     collections: [],
     trips: [],
-    media: [{ ...meta('m1'), schemaVersion: 1, mime: 'image/webp', hasBlob: true, palette: [] }],
+    media: [
+      {
+        ...meta('m1'),
+        schemaVersion: SCHEMA_VERSION,
+        mime: 'image/webp',
+        hasBlob: true,
+        palette: [],
+      },
+    ],
   };
 
   it('round-trips through JSON', () => {
@@ -253,9 +281,107 @@ describe('archive', () => {
   });
 
   it('builds a self-contained subset', () => {
-    const subset = subsetArchive(createArchive(snapshot), new Set(['a1']));
+    const list = collectionSchema.parse({
+      ...meta('c1'),
+      name: 'Favoriten',
+      items: [
+        { kind: 'artwork', id: 'a1' },
+        { kind: 'artwork', id: 'a2' },
+      ],
+    });
+    const subset = subsetArchive(createArchive({ ...snapshot, collections: [list] }), [
+      { kind: 'artwork', id: 'a1' },
+    ]);
     expect(subset.artworks.map((a) => a.id)).toEqual(['a1']);
     expect(subset.venues.map((v) => v.id)).toEqual(['v1']);
+    expect(subset.visits.map((v) => v.id)).toEqual(['x1']);
     expect(subset.media).toHaveLength(1);
+    expect(subset.collections[0]?.items).toEqual([{ kind: 'artwork', id: 'a1' }]);
+    expect(subset.trips).toEqual([]);
+  });
+
+  it('migrates archives written by version 0.1', () => {
+    const v1 = {
+      format: 'mnemo-archive',
+      version: 1,
+      exportedAt: '2026-10-21T10:00:00Z',
+      artworks: [{ ...meta('a1'), schemaVersion: 1, title: 'Feldhase' }],
+      collections: [
+        {
+          ...meta('c1'),
+          schemaVersion: 1,
+          name: 'Liste',
+          description: '',
+          artworkIds: ['a1'],
+          coverArtworkId: 'a1',
+        },
+      ],
+    };
+    const parsed = parseArchive(v1);
+    expect(parsed.collections[0]).toMatchObject({
+      items: [{ kind: 'artwork', id: 'a1' }],
+      coverItem: { kind: 'artwork', id: 'a1' },
+      schemaVersion: SCHEMA_VERSION,
+    });
+    expect(parsed.collections[0]).not.toHaveProperty('artworkIds');
+    expect(parsed.artworks[0]?.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(parsed.places).toEqual([]);
+  });
+
+  it('refuses archives from a newer version', () => {
+    const future = { format: 'mnemo-archive', version: SCHEMA_VERSION + 1, exportedAt: '' };
+    expect(() => parseArchive(future)).toThrow(NewerSchemaError);
+  });
+});
+
+describe('registry & migrations', () => {
+  it('registers every snapshot table', () => {
+    expect(entityNames).toEqual([
+      'places',
+      'venues',
+      'visits',
+      'artworks',
+      'collections',
+      'trips',
+      'media',
+    ]);
+    expect(Object.keys(emptySnapshot())).toEqual(entityNames);
+    for (const kind of collectibleKinds) expect(entityNames).toContain(collectibleTables[kind]);
+  });
+
+  it('has one ordered step per schema version', () => {
+    expect(migrations.map((m) => m.to)).toEqual(
+      Array.from({ length: SCHEMA_VERSION - 1 }, (_, i) => i + 2),
+    );
+  });
+
+  it('migrates rows step by step and leaves current rows alone', () => {
+    const row = { id: 'c', schemaVersion: 1, artworkIds: ['x'] };
+    expect(migrateRow('collections', row, 1)).toBe(row);
+    expect(migrateRow('collections', row)).toEqual({
+      id: 'c',
+      schemaVersion: SCHEMA_VERSION,
+      items: [{ kind: 'artwork', id: 'x' }],
+    });
+    const current = { id: 'p', schemaVersion: SCHEMA_VERSION };
+    expect(migrateRow('places', current)).toBe(current);
+    expect(migrateRow('places', { id: 'p' })).toEqual(current);
+  });
+});
+
+describe('collections', () => {
+  const list = collectionSchema.parse({
+    ...meta('c1'),
+    name: 'Liste',
+    items: [
+      { kind: 'artwork', id: 'a2' },
+      { kind: 'artwork', id: 'a1' },
+    ],
+  });
+
+  it('answers membership and order per kind', () => {
+    expect(collectionHas(list, { kind: 'artwork', id: 'a1' })).toBe(true);
+    expect(collectionHas(list, { kind: 'artwork', id: 'a3' })).toBe(false);
+    expect(itemIdsOf(list, 'artwork')).toEqual(['a2', 'a1']);
   });
 });

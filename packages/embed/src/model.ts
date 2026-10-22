@@ -38,6 +38,13 @@ export interface SelectOptions {
   limit?: number;
 }
 
+/** Artwork ids of a list in order; files exported before Mnemo 0.2 use `artworkIds`. */
+function artworkIdsOf(collection: Archive['collections'][number]): string[] {
+  const legacy = (collection as { artworkIds?: unknown }).artworkIds;
+  if (Array.isArray(legacy)) return legacy.filter((id): id is string => typeof id === 'string');
+  return (collection.items ?? []).flatMap((item) => (item.kind === 'artwork' ? [item.id] : []));
+}
+
 /** Turns an export into the flat, display-ready list the widget renders. */
 export function selectItems(archive: Archive, options: SelectOptions = {}): GalleryModel {
   const venues = new Map(archive.venues.map((v) => [v.id, v]));
@@ -52,7 +59,7 @@ export function selectItems(archive: Archive, options: SelectOptions = {}): Gall
     : undefined;
 
   let artworks = collection
-    ? collection.artworkIds.flatMap((id) => archive.artworks.find((a) => a.id === id) ?? [])
+    ? artworkIdsOf(collection).flatMap((id) => archive.artworks.find((a) => a.id === id) ?? [])
     : [...archive.artworks].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   const filter = options.filter ?? 'all';

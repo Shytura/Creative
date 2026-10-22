@@ -1,19 +1,5 @@
-import type {
-  Artwork,
-  ArtworkDraft,
-  Collection,
-  CollectionDraft,
-  Media,
-  MediaDraft,
-  Place,
-  PlaceDraft,
-  Trip,
-  TripDraft,
-  Venue,
-  VenueDraft,
-  Visit,
-  VisitDraft,
-} from './model/entities';
+import type { Media, MediaDraft } from './model/entities';
+import { type DraftOf, type EntityName, type EntityOf, entityNames } from './model/registry';
 import type { Settings, SettingsPatch } from './model/settings';
 
 /**
@@ -52,25 +38,16 @@ export interface SettingsRepository {
 }
 
 /** Every entity of a store, used for backup, export and sync. */
-export interface StoreSnapshot {
-  places: Place[];
-  venues: Venue[];
-  visits: Visit[];
-  artworks: Artwork[];
-  collections: Collection[];
-  trips: Trip[];
-  media: Media[];
-}
+export type StoreSnapshot = { [K in EntityName]: EntityOf<K>[] };
 
-export type EntityTable = keyof StoreSnapshot | 'settings';
+export type EntityTable = EntityName | 'settings';
 
-export interface MnemoStore {
-  places: EntityRepository<Place, PlaceDraft>;
-  venues: EntityRepository<Venue, VenueDraft>;
-  visits: EntityRepository<Visit, VisitDraft>;
-  artworks: EntityRepository<Artwork, ArtworkDraft>;
-  collections: EntityRepository<Collection, CollectionDraft>;
-  trips: EntityRepository<Trip, TripDraft>;
+/** One repository per registered entity type; media has its own contract because of blobs. */
+export type EntityRepositories = {
+  [K in Exclude<EntityName, 'media'>]: EntityRepository<EntityOf<K>, DraftOf<K>>;
+};
+
+export interface MnemoStore extends EntityRepositories {
   media: MediaRepository;
   settings: SettingsRepository;
 
@@ -86,4 +63,11 @@ export interface MnemoStore {
     blobs: Map<string, MediaBlobs>,
     mode: 'merge' | 'replace',
   ): Promise<void>;
+  /** Deletes all entities and media; settings are kept. */
+  clear(): Promise<void>;
+}
+
+/** A snapshot with every table empty. */
+export function emptySnapshot(): StoreSnapshot {
+  return Object.fromEntries(entityNames.map((n) => [n, []])) as unknown as StoreSnapshot;
 }

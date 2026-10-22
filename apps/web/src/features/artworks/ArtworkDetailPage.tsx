@@ -1,4 +1,11 @@
-import { accentFromPalette, onColor, removeArtwork, toggleInCollection } from '@mnemo/core';
+import {
+  accentFromPalette,
+  collectionHas,
+  type ItemRef,
+  onColor,
+  removeArtwork,
+  toggleInCollection,
+} from '@mnemo/core';
 import {
   Button,
   Chip,
@@ -122,7 +129,8 @@ export function ArtworkDetailPage() {
   const venue = artwork.venueId ? venues.get(artwork.venueId) : undefined;
   const place = placeOfVenue(artwork.venueId);
   const visit = visits?.find((v) => v.id === artwork.visitId);
-  const memberOf = (collections ?? []).filter((c) => c.artworkIds.includes(artwork.id));
+  const ref: ItemRef = { kind: 'artwork', id: artwork.id };
+  const memberOf = (collections ?? []).filter((c) => collectionHas(c, ref));
 
   const toggleFavorite = () =>
     void store.artworks.update(artwork.id, { favorite: !artwork.favorite });
@@ -253,16 +261,13 @@ export function ArtworkDetailPage() {
                     key={c.id}
                     onSelect={(e) => {
                       e.preventDefault();
-                      void toggleInCollection(store, c.id, artwork.id);
+                      void toggleInCollection(store, c.id, ref);
                     }}
                   >
-                    <CheckIcon className={cn(!c.artworkIds.includes(artwork.id) && 'opacity-0')} />{' '}
-                    {c.name}
+                    <CheckIcon className={cn(!collectionHas(c, ref) && 'opacity-0')} /> {c.name}
                   </MenuItem>
                 ))}
-                <MenuItem
-                  onSelect={() => dialogs.open({ type: 'collection', addArtworkId: artwork.id })}
-                >
+                <MenuItem onSelect={() => dialogs.open({ type: 'collection', addItem: ref })}>
                   <ListPlusIcon /> {t('collection.new')}
                 </MenuItem>
                 <MenuSeparator />

@@ -1,6 +1,7 @@
 import { paletteMatches } from '../lib/color';
 import { hashString, normalizeName, parseYear } from '../lib/misc';
 import type { Artwork, ArtworkStatus, Collection, Venue } from '../model/entities';
+import { itemIdsOf } from './collections';
 
 export const epochs = [
   { id: 'antiquity', to: 499 },
@@ -48,6 +49,7 @@ export function filterArtworks(
   const collection = filter.collectionId
     ? ctx.collections.find((c) => c.id === filter.collectionId)
     : undefined;
+  const memberIds = collection ? new Set(itemIdsOf(collection, 'artwork')) : undefined;
 
   const result = artworks.filter((a) => {
     const venue = a.venueId ? ctx.venues.get(a.venueId) : undefined;
@@ -59,7 +61,7 @@ export function filterArtworks(
     if (filter.tag && !a.tags.includes(filter.tag)) return false;
     if (filter.epoch && epochOf(parseYear(a.year)) !== filter.epoch) return false;
     if (filter.color && !paletteMatches(a.palette, filter.color)) return false;
-    if (collection && !collection.artworkIds.includes(a.id)) return false;
+    if (memberIds && !memberIds.has(a.id)) return false;
     if (terms.length > 0) {
       const haystack = normalizeName(
         [a.title, a.artist, a.medium, a.year, venue?.name, a.notes, ...a.tags].join(' '),
@@ -70,7 +72,7 @@ export function filterArtworks(
   });
 
   if (collection) {
-    const order = new Map(collection.artworkIds.map((id, i) => [id, i]));
+    const order = new Map(itemIdsOf(collection, 'artwork').map((id, i) => [id, i]));
     result.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
   }
   return result;

@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
-/** Bumped whenever the persisted shape of an entity changes; enables migrations and sync. */
-export const SCHEMA_VERSION = 1;
+/**
+ * Bumped whenever the persisted data changes shape or a table is added. Each bump comes with an
+ * entry in `migrations.ts` (and a matching IndexedDB version in `@mnemo/storage-dexie`).
+ */
+export const SCHEMA_VERSION = 2;
 
 export const idSchema = z.string().min(1);
 
@@ -36,4 +39,28 @@ export const externalIdsShape = {
   wikidataId: z.string().optional(),
   /** Wikipedia article as `lang:Title`, the same format OpenStreetMap uses. */
   wikipedia: z.string().optional(),
+};
+
+/** Where a collectible came from, e.g. a museum API or a library catalogue. */
+export const sourceSchema = z.object({
+  /** Provider id from `@mnemo/providers`, e.g. `aic`, `met`, `wikidata`. */
+  provider: z.string(),
+  externalId: z.string(),
+  url: z.string().optional(),
+  license: z.string().optional(),
+  credit: z.string().optional(),
+});
+
+/**
+ * Fields every collectible type shares (artworks today, books and more later). Shared services
+ * such as lists, favourites, tags and colour search rely only on these.
+ */
+export const collectibleShape = {
+  title: z.string().trim().min(1),
+  favorite: z.boolean().default(false),
+  tags: z.array(z.string()).default([]),
+  notes: z.string().default(''),
+  mediaIds: z.array(idSchema).default([]),
+  /** Dominant colours of the primary image, most prominent first. */
+  palette: z.array(hexColorSchema).default([]),
 };

@@ -329,11 +329,11 @@ export async function seedDemo(
       locale === 'de'
         ? 'Werke, zu denen ich immer wieder zurückkehre.'
         : 'Works I keep coming back to.',
-    artworkIds: favorites,
+    items: favorites.map((id) => ({ kind: 'artwork' as const, id })),
   });
   await store.collections.create({
     name: locale === 'de' ? 'Niederländische Meister' : 'Dutch Masters',
-    artworkIds: dutch,
+    items: dutch.map((id) => ({ kind: 'artwork' as const, id })),
   });
 
   await store.trips.create({

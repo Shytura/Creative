@@ -78,7 +78,7 @@ export async function exportShareable(store: MnemoStore, collectionId?: string):
   const collection = collectionId
     ? snapshot.collections.find((c) => c.id === collectionId)
     : undefined;
-  if (collection) archive = subsetArchive(archive, new Set(collection.artworkIds));
+  if (collection) archive = subsetArchive(archive, collection.items);
   const name = collection
     ? collection.name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-')
     : 'sammlung';
@@ -130,12 +130,4 @@ export async function importArchive(
   });
   await store.restore(snapshot, blobs, mode);
   return { artworks: snapshot.artworks.length, places: snapshot.places.length };
-}
-
-export async function clearAll(store: MnemoStore): Promise<void> {
-  await store.restore(
-    { places: [], venues: [], visits: [], artworks: [], collections: [], trips: [], media: [] },
-    new Map(),
-    'replace',
-  );
 }

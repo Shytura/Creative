@@ -40,10 +40,9 @@ function CollectionForm({
       const created = await store.collections.create({
         name: name.trim(),
         description,
-        artworkIds: spec.addArtworkId ? [spec.addArtworkId] : [],
+        items: spec.addItem ? [spec.addItem] : [],
       });
-      if (!spec.addArtworkId)
-        void navigate({ to: '/collection', search: { collection: created.id } });
+      if (!spec.addItem) void navigate({ to: '/collection', search: { collection: created.id } });
     }
     toast.success(t('collection.saved'));
     onClose();

@@ -4,12 +4,16 @@ import {
   ensurePlace,
   ensureVenue,
   ensureVisit,
+  entityNames,
+  migrations,
   removeArtwork,
   removePlace,
+  SCHEMA_VERSION,
   toggleInCollection,
 } from '@mnemo/core';
+import { Dexie } from 'dexie';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createDexieStore, type DexieStore } from '../src';
+import { createDexieStore, type DexieStore, STORES } from '../src';
 
 let store: DexieStore;
 
@@ -129,11 +133,12 @@ describe('domain commands', () => {
     const media = await store.media.create({}, { full: new Blob(['x']) });
     const artwork = await store.artworks.create({ title: 'Kuss', mediaIds: [media.id] });
     const collection = await store.collections.create({ name: 'Gold' });
-    await toggleInCollection(store, collection.id, artwork.id);
-    expect((await store.collections.get(collection.id))?.artworkIds).toEqual([artwork.id]);
+    const ref = { kind: 'artwork' as const, id: artwork.id };
+    await toggleInCollection(store, collection.id, ref);
+    expect((await store.collections.get(collection.id))?.items).toEqual([ref]);
 
     await removeArtwork(store, artwork.id);
-    expect((await store.collections.get(collection.id))?.artworkIds).toEqual([]);
+    expect((await store.collections.get(collection.id))?.items).toEqual([]);
     expect(await store.media.get(media.id)).toBeUndefined();
   });
 
@@ -172,6 +177,17 @@ describe('snapshot & restore', () => {
     await target.db.delete();
   });
 
+  it('clears all entities but keeps settings', async () => {
+    await seedVienna();
+    await store.media.create({}, { full: new Blob(['img']) });
+    await store.settings.update({ theme: 'dark' });
+    await store.clear();
+    const snapshot = await store.snapshot();
+    expect(Object.values(snapshot).every((rows) => rows.length === 0)).toBe(true);
+    expect(await store.media.usage()).toBe(0);
+    expect((await store.settings.get()).theme).toBe('dark');
+  });
+
   it('notifies subscribers about changed tables', async () => {
     const seen: string[][] = [];
     const unsubscribe = store.subscribe((tables) => seen.push(tables));
@@ -179,5 +195,39 @@ describe('snapshot & restore', () => {
     await new Promise((r) => setTimeout(r, 50));
     unsubscribe();
     expect(seen.flat()).toContain('places');
+  });
+});
+
+describe('schema upgrades', () => {
+  it('declares indexes for every schema version and every entity', () => {
+    expect(Object.keys(STORES).map(Number)).toEqual([1, ...migrations.map((m) => m.to)]);
+    expect(Math.max(...Object.keys(STORES).map(Number))).toBe(SCHEMA_VERSION);
+    const tables = new Set(Object.values(STORES).flatMap((s) => Object.keys(s)));
+    for (const name of entityNames) expect(tables).toContain(name);
+  });
+
+  it('migrates a database created by version 0.1', async () => {
+    const name = `legacy-${createId()}`;
+    const legacy = new Dexie(name);
+    legacy.version(1).stores(STORES[1]!);
+    const row = { createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' };
+    await legacy.table('artworks').add({ ...row, id: 'a1', schemaVersion: 1, title: 'Feldhase' });
+    await legacy.table('collections').add({
+      ...row,
+      id: 'c1',
+      schemaVersion: 1,
+      name: 'Dürer',
+      description: '',
+      artworkIds: ['a1'],
+    });
+    legacy.close();
+
+    const upgraded = createDexieStore(name);
+    const collection = await upgraded.collections.get('c1');
+    expect(collection?.items).toEqual([{ kind: 'artwork', id: 'a1' }]);
+    expect(collection).not.toHaveProperty('artworkIds');
+    expect(collection?.schemaVersion).toBe(SCHEMA_VERSION);
+    expect((await upgraded.artworks.get('a1'))?.title).toBe('Feldhase');
+    await upgraded.db.delete();
   });
 });

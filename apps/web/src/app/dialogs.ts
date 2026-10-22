@@ -1,3 +1,4 @@
+import type { ItemRef } from '@mnemo/core';
 import { createContext, useContext } from 'react';
 
 /** Global create/edit dialogs, reachable from anywhere (quick add, detail pages, …). */
@@ -14,7 +15,7 @@ export type DialogSpec =
   | { type: 'venue'; venueId?: string; placeId?: string }
   | { type: 'place'; placeId?: string }
   | { type: 'trip'; tripId?: string }
-  | { type: 'collection'; collectionId?: string; addArtworkId?: string };
+  | { type: 'collection'; collectionId?: string; addItem?: ItemRef };
 
 export interface DialogProps<T extends DialogSpec['type']> {
   spec: Extract<DialogSpec, { type: T }>;

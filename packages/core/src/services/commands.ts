@@ -1,6 +1,7 @@
 import { normalizeName } from '../lib/misc';
 import type { Place, PlaceDraft, Venue, VenueDraft, Visit } from '../model/entities';
 import type { MnemoStore } from '../repositories';
+import { unlinkFromCollections } from './collections';
 
 /**
  * Domain operations spanning several repositories. They keep references consistent and are
@@ -53,14 +54,7 @@ export async function removeArtwork(store: MnemoStore, id: string): Promise<void
   await store.transaction(async () => {
     const artwork = await store.artworks.get(id);
     if (!artwork) return;
-    for (const c of await store.collections.list()) {
-      if (c.artworkIds.includes(id)) {
-        await store.collections.update(c.id, {
-          artworkIds: c.artworkIds.filter((a) => a !== id),
-          coverArtworkId: c.coverArtworkId === id ? undefined : c.coverArtworkId,
-        });
-      }
-    }
+    await unlinkFromCollections(store, { kind: 'artwork', id });
     for (const mediaId of artwork.mediaIds) await store.media.delete(mediaId);
     await store.artworks.delete(id);
   });
@@ -113,21 +107,6 @@ export async function removePlace(store: MnemoStore, id: string): Promise<void> 
     const place = await store.places.get(id);
     if (place?.coverMediaId) await store.media.delete(place.coverMediaId);
     await store.places.delete(id);
-  });
-}
-
-export async function toggleInCollection(
-  store: MnemoStore,
-  collectionId: string,
-  artworkId: string,
-): Promise<void> {
-  const collection = await store.collections.get(collectionId);
-  if (!collection) return;
-  const has = collection.artworkIds.includes(artworkId);
-  await store.collections.update(collectionId, {
-    artworkIds: has
-      ? collection.artworkIds.filter((id) => id !== artworkId)
-      : [...collection.artworkIds, artworkId],
   });
 }
 

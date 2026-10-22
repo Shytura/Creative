@@ -1,12 +1,28 @@
 import { z } from 'zod';
 import {
+  collectibleShape,
   coordsSchema,
   entityMetaShape,
   externalIdsShape,
   hexColorSchema,
   idSchema,
   isoDateSchema,
+  sourceSchema,
 } from './common';
+
+// ── Collectible kinds ──────────────────────────────────────────────────────
+
+/**
+ * Every entity type that can be collected into lists. Adding a type (e.g. `book`) means adding
+ * it here and mapping it to its table in `registry.ts`.
+ */
+export const collectibleKinds = ['artwork'] as const;
+export const collectibleKindSchema = z.enum(collectibleKinds);
+export type CollectibleKind = z.infer<typeof collectibleKindSchema>;
+
+/** A typed pointer to any collectible, used by lists and other cross-type references. */
+export const itemRefSchema = z.object({ kind: collectibleKindSchema, id: idSchema });
+export type ItemRef = z.infer<typeof itemRefSchema>;
 
 // ── Place: a city or town ──────────────────────────────────────────────────
 
@@ -78,13 +94,7 @@ export const artworkStatuses = ['seen', 'wishlist'] as const;
 export const artworkStatusSchema = z.enum(artworkStatuses);
 export type ArtworkStatus = z.infer<typeof artworkStatusSchema>;
 
-export const artworkSourceSchema = z.object({
-  /** Provider id from `@mnemo/providers`, e.g. `aic`, `met`, `wikidata`. */
-  provider: z.string(),
-  externalId: z.string(),
-  url: z.string().optional(),
-  license: z.string().optional(),
-  credit: z.string().optional(),
+export const artworkSourceSchema = sourceSchema.extend({
   /** IIIF Image API `info.json`, enables deep zoom. */
   iiifInfoUrl: z.string().optional(),
   museumName: z.string().optional(),
@@ -92,7 +102,7 @@ export const artworkSourceSchema = z.object({
 export type ArtworkSource = z.infer<typeof artworkSourceSchema>;
 
 export const artworkDraftSchema = z.object({
-  title: z.string().trim().min(1),
+  ...collectibleShape,
   artist: z.string().optional(),
   /** Display date as written by the museum, e.g. `c. 1868–73`. */
   year: z.string().optional(),
@@ -100,25 +110,19 @@ export const artworkDraftSchema = z.object({
   status: artworkStatusSchema.default('seen'),
   venueId: idSchema.optional(),
   visitId: idSchema.optional(),
-  notes: z.string().default(''),
-  tags: z.array(z.string()).default([]),
-  favorite: z.boolean().default(false),
-  mediaIds: z.array(idSchema).default([]),
-  /** Dominant colours of the primary image, most prominent first. */
-  palette: z.array(hexColorSchema).default([]),
   source: artworkSourceSchema.optional(),
 });
 export const artworkSchema = artworkDraftSchema.extend(entityMetaShape);
 export type ArtworkDraft = z.input<typeof artworkDraftSchema>;
 export type Artwork = z.infer<typeof artworkSchema>;
 
-// ── Collection: a user-curated, ordered list of artworks ───────────────────
+// ── Collection: a user-curated, ordered list of collectibles of any kind ───
 
 export const collectionDraftSchema = z.object({
   name: z.string().trim().min(1),
   description: z.string().default(''),
-  coverArtworkId: idSchema.optional(),
-  artworkIds: z.array(idSchema).default([]),
+  coverItem: itemRefSchema.optional(),
+  items: z.array(itemRefSchema).default([]),
 });
 export const collectionSchema = collectionDraftSchema.extend(entityMetaShape);
 export type CollectionDraft = z.input<typeof collectionDraftSchema>;

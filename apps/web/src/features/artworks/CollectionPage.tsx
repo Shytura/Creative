@@ -4,6 +4,7 @@ import {
   epochs,
   facet,
   filterArtworks,
+  itemIdsOf,
   paletteMatches,
 } from '@mnemo/core';
 import {
@@ -196,7 +197,7 @@ export function CollectionPage() {
             active={search.collection === c.id}
             onClick={() => setSearch({ collection: c.id })}
           >
-            {c.name} <span className="opacity-50">{c.artworkIds.length}</span>
+            {c.name} <span className="opacity-50">{itemIdsOf(c, 'artwork').length}</span>
           </Chip>
         ))}
         <Chip onClick={() => dialogs.open({ type: 'collection' })} className="border-dashed">

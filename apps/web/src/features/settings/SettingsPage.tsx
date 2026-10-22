@@ -34,7 +34,7 @@ import { useStore } from '../../app/store';
 import { releases } from '../../changelog';
 import { Confirm } from '../../components/bits';
 import { MediaImage } from '../../components/MediaImage';
-import { clearAll, exportBackup, exportShareable, importArchive } from '../../lib/archive-io';
+import { exportBackup, exportShareable, importArchive } from '../../lib/archive-io';
 import { useFormat } from '../../lib/format';
 import { processImage, saveProcessedImage } from '../../lib/media';
 import { APP_VERSION } from '../../version';
@@ -560,7 +560,7 @@ function DataSection() {
           description={t('settings.clearText')}
           confirmLabel={t('settings.clearConfirm')}
           onConfirm={async () => {
-            await clearAll(store);
+            await store.clear();
             toast.success(t('settings.cleared'));
           }}
           trigger={(open) => (

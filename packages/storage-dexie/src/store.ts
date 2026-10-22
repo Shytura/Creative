@@ -1,31 +1,23 @@
 import {
-  artworkDraftSchema,
-  artworkSchema,
-  collectionDraftSchema,
-  collectionSchema,
   createId,
   defaultSettings,
   type EntityMeta,
+  type EntityName,
+  type EntityRepositories,
   type EntityRepository,
   type EntityTable,
+  entities,
+  entityNames,
   type MediaBlobs,
   type MediaRepository,
   type MnemoStore,
   mediaDraftSchema,
   mediaSchema,
   nowIso,
-  placeDraftSchema,
-  placeSchema,
   SCHEMA_VERSION,
   type SettingsRepository,
   type StoreSnapshot,
   settingsSchema,
-  tripDraftSchema,
-  tripSchema,
-  venueDraftSchema,
-  venueSchema,
-  visitDraftSchema,
-  visitSchema,
 } from '@mnemo/core';
 import { Dexie, type Table } from 'dexie';
 import { type MediaBlobRow, MnemoDatabase } from './db';
@@ -75,30 +67,31 @@ function entityRepository<T extends EntityMeta, TDraft>(
 }
 
 function mediaRepository(db: MnemoDatabase): MediaRepository {
+  const media = db.entity('media');
   const putBlobs = async (id: string, blobs?: MediaBlobs) => {
     if (blobs && (blobs.full || blobs.thumb)) await db.mediaBlobs.put({ id, ...blobs });
   };
   return {
-    get: (id) => db.media.get(id),
-    list: () => db.media.toArray(),
+    get: (id) => media.get(id),
+    list: () => media.toArray(),
     async create(draft, blobs) {
       const timestamp = nowIso();
-      const media = mediaSchema.parse({
+      const entity = mediaSchema.parse({
         ...mediaDraftSchema.parse(draft),
         hasBlob: Boolean(blobs?.full || blobs?.thumb),
         id: createId(),
         createdAt: timestamp,
         updatedAt: timestamp,
       });
-      await db.transaction('rw', db.media, db.mediaBlobs, async () => {
-        await db.media.add(media);
-        await putBlobs(media.id, blobs);
+      await db.transaction('rw', media, db.mediaBlobs, async () => {
+        await media.add(entity);
+        await putBlobs(entity.id, blobs);
       });
-      return media;
+      return entity;
     },
     async update(id, patch, blobs) {
-      return db.transaction('rw', db.media, db.mediaBlobs, async () => {
-        const existing = await db.media.get(id);
+      return db.transaction('rw', media, db.mediaBlobs, async () => {
+        const existing = await media.get(id);
         if (!existing) throw new NotFoundError('media', id);
         const next = mediaSchema.parse({
           ...existing,
@@ -107,7 +100,7 @@ function mediaRepository(db: MnemoDatabase): MediaRepository {
           id,
           updatedAt: nowIso(),
         });
-        await db.media.put(next);
+        await media.put(next);
         await putBlobs(id, blobs);
         return next;
       });
@@ -117,8 +110,8 @@ function mediaRepository(db: MnemoDatabase): MediaRepository {
       return variant === 'thumb' ? (row?.thumb ?? row?.full) : (row?.full ?? row?.thumb);
     },
     async delete(id) {
-      await db.transaction('rw', db.media, db.mediaBlobs, async () => {
-        await db.media.delete(id);
+      await db.transaction('rw', media, db.mediaBlobs, async () => {
+        await media.delete(id);
         await db.mediaBlobs.delete(id);
       });
     },
@@ -150,15 +143,10 @@ function settingsRepository(db: MnemoDatabase): SettingsRepository {
   };
 }
 
-const ENTITY_TABLES = [
-  'places',
-  'venues',
-  'visits',
-  'artworks',
-  'collections',
-  'trips',
-  'media',
-] as const satisfies ReadonlyArray<keyof StoreSnapshot>;
+/** Entity tables with a plain repository; media has its own because of blobs. */
+const REPOSITORY_TABLES = entityNames.filter(
+  (n): n is Exclude<EntityName, 'media'> => n !== 'media',
+);
 
 export interface DexieStore extends MnemoStore {
   /** Escape hatch for advanced queries and debugging. */
@@ -170,14 +158,16 @@ export interface DexieStore extends MnemoStore {
 export function createDexieStore(name = 'mnemo'): DexieStore {
   const db = new MnemoDatabase(name);
 
+  const repositories = Object.fromEntries(
+    REPOSITORY_TABLES.map((name) => [
+      name,
+      entityRepository(db.entity(name), entities[name].draftSchema, entities[name].schema),
+    ]),
+  ) as unknown as EntityRepositories;
+
   const store: DexieStore = {
     db,
-    places: entityRepository(db.places, placeDraftSchema, placeSchema),
-    venues: entityRepository(db.venues, venueDraftSchema, venueSchema),
-    visits: entityRepository(db.visits, visitDraftSchema, visitSchema),
-    artworks: entityRepository(db.artworks, artworkDraftSchema, artworkSchema),
-    collections: entityRepository(db.collections, collectionDraftSchema, collectionSchema),
-    trips: entityRepository(db.trips, tripDraftSchema, tripSchema),
+    ...repositories,
     media: mediaRepository(db),
     settings: settingsRepository(db),
 
@@ -202,10 +192,10 @@ export function createDexieStore(name = 'mnemo'): DexieStore {
     async snapshot() {
       return db.transaction(
         'r',
-        ENTITY_TABLES.map((t) => db[t]),
+        entityNames.map((t) => db.entity(t)),
         async () => {
           const entries = await Promise.all(
-            ENTITY_TABLES.map(async (t) => [t, await db[t].toArray()] as const),
+            entityNames.map(async (t) => [t, await db.entity(t).toArray()] as const),
           );
           return Object.fromEntries(entries) as unknown as StoreSnapshot;
         },
@@ -213,18 +203,16 @@ export function createDexieStore(name = 'mnemo'): DexieStore {
     },
 
     async restore(snapshot, blobs, mode) {
-      await db.transaction('rw', [...ENTITY_TABLES.map((t) => db[t]), db.mediaBlobs], async () => {
+      const tables = entityNames.map((t) => db.entity(t));
+      await db.transaction('rw', [...tables, db.mediaBlobs], async () => {
         if (mode === 'replace') {
-          await Promise.all([...ENTITY_TABLES.map((t) => db[t].clear()), db.mediaBlobs.clear()]);
+          await Promise.all([...tables.map((t) => t.clear()), db.mediaBlobs.clear()]);
         }
-        await db.places.bulkPut(snapshot.places);
-        await db.venues.bulkPut(snapshot.venues);
-        await db.visits.bulkPut(snapshot.visits);
-        await db.artworks.bulkPut(snapshot.artworks);
-        await db.collections.bulkPut(snapshot.collections);
-        await db.trips.bulkPut(snapshot.trips);
+        for (const name of REPOSITORY_TABLES) {
+          await (db.entity(name) as Table<EntityMeta, string>).bulkPut(snapshot[name]);
+        }
         const storedBlobIds = new Set(await db.mediaBlobs.toCollection().primaryKeys());
-        await db.media.bulkPut(
+        await db.entity('media').bulkPut(
           snapshot.media.map((m) => ({
             ...m,
             hasBlob: blobs.has(m.id) || storedBlobIds.has(m.id),
@@ -233,6 +221,11 @@ export function createDexieStore(name = 'mnemo'): DexieStore {
         const rows: MediaBlobRow[] = [...blobs].map(([id, b]) => ({ id, ...b }));
         await db.mediaBlobs.bulkPut(rows);
       });
+    },
+
+    async clear() {
+      const tables = [...entityNames.map((t) => db.entity(t)), db.mediaBlobs];
+      await db.transaction('rw', tables, () => Promise.all(tables.map((t) => t.clear())));
     },
 
     close: () => db.close(),

@@ -1,4 +1,4 @@
-import { parseArchive } from '@mnemo/core';
+import { type Archive, parseArchive } from '@mnemo/core';
 import { beforeAll, describe, expect, it } from 'vitest';
 import sample from '../../../apps/embed-demo/public/sample-collection.json';
 import { isArchive, type MnemoGallery, selectItems } from '../src';
@@ -17,6 +17,16 @@ describe('selectItems', () => {
     expect(model.heading).toBe('Lieblingswerke');
     expect(model.items.map((i) => i.id)).toEqual(['a1', 'a2', 'a3', 'a5']);
     expect(model.items[0]).toMatchObject({ venue: 'Oberes Belvedere', place: 'Wien' });
+  });
+
+  it('reads lists from exports of Mnemo 0.1 (artworkIds) as well', () => {
+    const legacy = sample as unknown as Archive;
+    expect(selectItems(legacy, { collection: 'Lieblingswerke' }).items.map((i) => i.id)).toEqual([
+      'a1',
+      'a2',
+      'a3',
+      'a5',
+    ]);
   });
 
   it('filters and limits', () => {

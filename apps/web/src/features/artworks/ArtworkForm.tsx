@@ -1,4 +1,12 @@
-import { type Artwork, type ArtworkStatus, ensureVisit, nearby, type Venue } from '@mnemo/core';
+import {
+  type Artwork,
+  type ArtworkStatus,
+  collectionHas,
+  ensureVisit,
+  nearby,
+  setCollectionsOf,
+  type Venue,
+} from '@mnemo/core';
 import { type PlaceResult, photonProvider } from '@mnemo/providers';
 import {
   Button,
@@ -86,7 +94,7 @@ function ArtworkForm({
     () =>
       new Set(
         (collections ?? [])
-          .filter((c) => artwork && c.artworkIds.includes(artwork.id))
+          .filter((c) => artwork && collectionHas(c, { kind: 'artwork', id: artwork.id }))
           .map((c) => c.id),
       ),
   );
@@ -207,17 +215,7 @@ function ArtworkForm({
       for (const removed of (artwork?.mediaIds ?? []).filter((id) => !keptMediaIds.includes(id))) {
         await store.media.delete(removed);
       }
-      for (const c of collections ?? []) {
-        const has = c.artworkIds.includes(saved.id);
-        const wants = collectionIds.has(c.id);
-        if (has !== wants) {
-          await store.collections.update(c.id, {
-            artworkIds: wants
-              ? [...c.artworkIds, saved.id]
-              : c.artworkIds.filter((id) => id !== saved.id),
-          });
-        }
-      }
+      await setCollectionsOf(store, { kind: 'artwork', id: saved.id }, collectionIds);
 
       onClose();
       toast.success(artwork ? t('artwork.updated') : t('artwork.created', { title: saved.title }), {
