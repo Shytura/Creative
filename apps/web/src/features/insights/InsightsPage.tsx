@@ -84,7 +84,7 @@ export function InsightsPage() {
         </section>
       )}
 
-      <div className="mt-20 grid gap-16 lg:grid-cols-2">
+      <div className="mt-20 grid grid-cols-1 gap-16 lg:grid-cols-2">
         {insights.visitsByYear.length > 0 && (
           <section>
             <SectionTitle>{t('insights.visitsPerYear')}</SectionTitle>
@@ -110,7 +110,7 @@ export function InsightsPage() {
         </section>
       </div>
 
-      <div className="mt-20 grid gap-16 lg:grid-cols-3">
+      <div className="mt-20 grid grid-cols-1 gap-16 lg:grid-cols-3">
         <section>
           <SectionTitle>{t('insights.artists')}</SectionTitle>
           <RankList
@@ -172,7 +172,8 @@ function ColumnChart({
 }) {
   const max = Math.max(1, ...data.map((d) => d.value));
   return (
-    <figure>
+    // Clip sideways only: hover labels at the edges must not widen the page.
+    <figure className="overflow-x-clip">
       <div
         className="relative flex h-56 items-end gap-0.5 border-b border-line-strong"
         aria-hidden="true"
@@ -185,7 +186,10 @@ function ColumnChart({
           />
         ))}
         {data.map((d) => (
-          <div key={d.key} className="group relative flex h-full flex-1 items-end justify-center">
+          <div
+            key={d.key}
+            className="group relative flex h-full min-w-0 flex-1 items-end justify-center"
+          >
             <div
               className="w-full max-w-10 rounded-t-[4px] bg-accent transition-opacity group-hover:opacity-80"
               style={{ height: `${(d.value / max) * 100}%`, minHeight: d.value > 0 ? 2 : 0 }}
@@ -200,7 +204,7 @@ function ColumnChart({
         {data.map((d) => (
           <span
             key={d.key}
-            className={`flex-1 truncate text-center text-ink-3 tabular-nums ${compactLabels ? 'text-[0.625rem]' : 'text-xs'}`}
+            className={`min-w-0 flex-1 truncate text-center text-ink-3 tabular-nums ${compactLabels ? 'text-[0.625rem]' : 'text-xs'}`}
             title={d.label}
           >
             {d.label}

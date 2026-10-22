@@ -175,12 +175,12 @@ export function SettingsPage() {
 
 function Section({ title, text, children }: { title: string; text?: string; children: ReactNode }) {
   return (
-    <section className="grid gap-6 py-12 lg:grid-cols-[18rem_1fr] lg:gap-16">
+    <section className="grid grid-cols-1 gap-6 py-12 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-16">
       <div>
         <h2 className="display text-3xl font-[420]">{title}</h2>
         {text && <p className="mt-3 text-sm leading-relaxed text-ink-3">{text}</p>}
       </div>
-      <div>{children}</div>
+      <div className="min-w-0">{children}</div>
     </section>
   );
 }
