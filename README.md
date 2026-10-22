@@ -57,6 +57,8 @@ Settings → Data.
 ```
 apps/
   web/            PWA: React 19, TanStack Router + Query, Tailwind v4
+    src/modules/  one folder per area (home, art, travel): nav, quick add, dialogs, routes
+    src/features/ the pages and forms the modules wire up
   embed-demo/     third-party sample page that embeds the widget
 packages/
   core/           data model (zod), repository contracts, domain logic – no React, no DB
@@ -75,6 +77,19 @@ TanStack Query with keys `['local', table, …]`. Writes go straight to the stor
 (`useStore()`). The store reports every change, including those from other tabs, and
 `MnemoProvider` then invalidates the affected queries. That is why there is no manual refresh
 and no global state container.
+
+**One registry for all data.** `packages/core/src/model/registry.ts` lists every persisted
+entity type. The store contract (`MnemoStore`), snapshots, the archive format, backups and the
+IndexedDB store are derived from it, so a new type is one schema plus one registry entry.
+
+**Migrations.** `SCHEMA_VERSION` counts changes to persisted data. Each bump adds a pure,
+per-row step to `packages/core/src/migrations.ts`; the same steps run when IndexedDB upgrades
+(Dexie versions follow the schema version, see `packages/storage-dexie/src/db.ts`) and when an
+older backup is imported. Rows carry their own `schemaVersion`, so mixed data migrates safely.
+
+**Collectibles and lists.** Types that can be collected (today artworks) share
+`collectibleShape` (title, favourite, tags, notes, images, palette). Lists hold typed
+references `{ kind, id }`, so one list can mix artworks with future types such as books.
 
 **Domain rules** live in `packages/core/src/services`, for example “deleting a place also
 deletes its visits and unlinks its works” or “a completed trip item becomes a visit”. This
@@ -134,7 +149,26 @@ via `::part(item)`, `::part(caption)` and `::part(header)`.
 
 ![Widget on a third-party page](docs/screenshots/embed.webp)
 
-### 4. Add a new art data source
+### 4. Add a new area or collectible type
+
+A new collection type such as books touches these places, in this order:
+
+1. **Model** – schemas in `packages/core/src/model/entities.ts` (spread `collectibleShape`), add
+   the kind to `collectibleKinds`, register the table in `registry.ts` and `collectibleTables`.
+   The compiler then points at every place that must handle the new kind (e.g. `subsetArchive`).
+2. **Migration** – bump `SCHEMA_VERSION`, append a step to `migrations.ts` (`tables: {}` if no
+   existing rows change) and add the new table's indexes under that version in `STORES`
+   (`packages/storage-dexie/src/db.ts`). Tests check that versions and tables line up.
+3. **Data sources** – a provider interface and adapters in `packages/providers/src/<area>/`.
+   Providers that need a key declare `requiresKey` and appear in the settings automatically.
+4. **UI** – pages and forms in `apps/web/src/features/<area>/`, then a module in
+   `apps/web/src/modules/<area>/` with `index.ts` (nav, quick add, dialogs; dialog parameters
+   via `declare module '../../app/dialogs'`) and `routes.tsx`. Register it in
+   `src/modules/index.ts` and its routes in `src/app/router.tsx`.
+5. **Texts & release notes** – keys in `packages/i18n`, an entry in `apps/web/src/changelog.ts`
+   (shown as “What's new”) and in `CHANGELOG.md`; bump the version in `apps/web/package.json`.
+
+### 5. Add a new art data source
 
 Implement `ArtworkSearchProvider` in `packages/providers/src/art/` and register it in
 `artProviders` (`packages/providers/src/index.ts`). “Discover” then shows it automatically.
@@ -168,14 +202,20 @@ persistent storage (`navigator.storage.persist()`). External services only recei
 search for: search terms, place coordinates for suggestions and image requests. Since there
 is no server, there is no sync either, so back up your data regularly as a ZIP.
 
-## Ideas for later
+## Roadmap
 
-The code already has extension points prepared for these:
+The foundation (registry, migrations, typed lists, app modules) is in place for these steps:
 
-- **Sync:** a `storage-rest` package against a small backend; `snapshot`/`restore` and
-  `schemaVersion` are already in place.
-- **Exhibition mode:** full-screen slideshow with a Ken Burns effect over a list.
-- **Art passport:** a stamp per museum visited, a collector's album in Insights.
-- **Sharing:** a postcard of a work as PNG with palette and note.
-- **Comparison:** two works side by side with synchronised deep zoom.
-- **Museum labels via OCR** (e.g. Tesseract.js) to fill in details automatically.
+1. **People:** a `creators` entity (artists, later authors) linked to Wikidata, replacing the
+   free-text artist field via a migration.
+2. **Library:** a `book` collectible with Open Library and Google Books as sources, ISBN scan
+   via the camera, reading status, quotes and lending.
+3. **More data:** further museum APIs (Rijksmuseum, V&A, Smithsonian), a `⌘K` search across all
+   collectibles, `.ics` export of trips.
+4. **Hosting & sync:** static hosting first; then a `sync` package (e.g. Supabase) on top of the
+   local store, with `deletedAt` tombstones so deletions reach other devices.
+5. **Assistance:** optional AI features (descriptions, tags, museum label OCR) behind a server
+   proxy, so no API key lives in the browser.
+
+Smaller ideas: exhibition mode (full-screen slideshow), an art passport of visited museums, a
+postcard of a work as PNG, and two works side by side with synchronised deep zoom.
