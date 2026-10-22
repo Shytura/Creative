@@ -20,6 +20,7 @@ import {
   ListIcon,
   PencilIcon,
   PlusIcon,
+  ScanBarcodeIcon,
   SearchIcon,
   SlidersHorizontalIcon,
 } from 'lucide-react';
@@ -102,7 +103,13 @@ export function LibraryPage() {
               <Button onClick={() => dialogs.open({ type: 'addBook' })}>
                 <PlusIcon /> {t('library.addFirst')}
               </Button>
-              <Button variant="outline" onClick={() => dialogs.open({ type: 'book' })}>
+              <Button
+                variant="outline"
+                onClick={() => dialogs.open({ type: 'addBook', scan: true })}
+              >
+                <ScanBarcodeIcon /> {t('book.scan.button')}
+              </Button>
+              <Button variant="ghost" onClick={() => dialogs.open({ type: 'book' })}>
                 {t('book.add.manual')}
               </Button>
             </div>
@@ -130,6 +137,15 @@ export function LibraryPage() {
                 <PencilIcon /> {t('common.edit')}
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={t('book.scan.button')}
+              title={t('book.scan.button')}
+              onClick={() => dialogs.open({ type: 'addBook', scan: true })}
+            >
+              <ScanBarcodeIcon />
+            </Button>
             <Button onClick={() => dialogs.open({ type: 'addBook' })}>
               <PlusIcon /> {t('library.add')}
             </Button>

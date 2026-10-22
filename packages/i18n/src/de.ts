@@ -334,6 +334,18 @@ export const de = {
       favoriteHint: 'Erscheint im Salon und lässt sich filtern.',
       processing: 'Cover wird vorbereitet …',
     },
+    scan: {
+      button: 'ISBN scannen',
+      hint: 'Halte den Strichcode auf der Rückseite in den Rahmen.',
+      torch: 'Licht',
+      stop: 'Scan beenden',
+      insecure:
+        'Die Kamera lässt sich nur über eine sichere Verbindung (https) nutzen. Tippe die ISBN einfach ein.',
+      denied:
+        'Mnemo darf die Kamera nicht nutzen. Erlaube den Zugriff in den Browser-Einstellungen oder tippe die ISBN ein.',
+      noCamera: 'Keine Kamera gefunden. Tippe die ISBN einfach ein.',
+      failed: 'Der Scanner ließ sich nicht starten. Tippe die ISBN einfach ein.',
+    },
     add: {
       eyebrow: 'Buch hinzufügen',
       title: 'Was liegt auf deinem Tisch?',

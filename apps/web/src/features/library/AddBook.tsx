@@ -3,7 +3,7 @@ import { availableBookProviders, type BookSearchResult, lookupIsbn } from '@mnem
 import { Button, Dialog, DialogContent, Input, Spinner } from '@mnemo/ui';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { BarcodeIcon, SearchIcon } from 'lucide-react';
+import { BarcodeIcon, ScanBarcodeIcon, SearchIcon } from 'lucide-react';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBooks, useProviderContext } from '../../app/data';
@@ -13,6 +13,7 @@ import { BookCover } from '../../components/BookCover';
 import { ErrorNote } from '../../components/bits';
 import { useFormat } from '../../lib/format';
 import { useDebounced } from '../../lib/hooks';
+import { IsbnScanner } from './IsbnScanner';
 
 /**
  * One field for everything: an ISBN is looked up directly in all catalogues, anything else
@@ -23,6 +24,7 @@ export function AddBookDialog({ spec, onClose }: DialogProps<'addBook'>) {
   const dialogs = useDialogs();
   const ctx = useProviderContext();
   const [text, setText] = useState('');
+  const [scanning, setScanning] = useState(spec.scan ?? false);
   const input = useDebounced(text.trim(), 350);
   const isbn = normalizeIsbn(input);
   const providers = useMemo(() => availableBookProviders(ctx.keys), [ctx.keys]);
@@ -120,22 +122,46 @@ export function AddBookDialog({ spec, onClose }: DialogProps<'addBook'>) {
           </>
         }
       >
-        <div className="relative">
-          <SearchIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-3" />
-          <Input
-            type="search"
-            autoFocus
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={t('book.add.placeholder')}
-            aria-label={t('book.add.placeholder')}
-            className="h-12 rounded-full pr-12 pl-10 text-base [&::-webkit-search-cancel-button]:hidden"
-          />
-          {isbn ? (
-            <BarcodeIcon className="absolute top-1/2 right-4 size-4 -translate-y-1/2 text-accent" />
-          ) : fetching ? (
-            <Spinner className="absolute top-1/2 right-4 size-4 -translate-y-1/2" />
-          ) : null}
+        {scanning && (
+          <div className="mb-5">
+            <IsbnScanner
+              onDetect={(found) => {
+                setText(found);
+                setScanning(false);
+              }}
+              onCancel={() => setScanning(false)}
+            />
+          </div>
+        )}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <SearchIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-3" />
+            <Input
+              type="search"
+              autoFocus={!scanning}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={t('book.add.placeholder')}
+              aria-label={t('book.add.placeholder')}
+              className="h-12 rounded-full pr-12 pl-10 text-base [&::-webkit-search-cancel-button]:hidden"
+            />
+            {isbn ? (
+              <BarcodeIcon className="absolute top-1/2 right-4 size-4 -translate-y-1/2 text-accent" />
+            ) : fetching ? (
+              <Spinner className="absolute top-1/2 right-4 size-4 -translate-y-1/2" />
+            ) : null}
+          </div>
+          <Button
+            variant={scanning ? 'accent' : 'outline'}
+            size="icon"
+            aria-pressed={scanning}
+            aria-label={t('book.scan.button')}
+            title={t('book.scan.button')}
+            onClick={() => setScanning(!scanning)}
+            className="size-12 shrink-0 rounded-full"
+          >
+            <ScanBarcodeIcon />
+          </Button>
         </div>
         <div className="mt-6 min-h-24">{body}</div>
       </DialogContent>

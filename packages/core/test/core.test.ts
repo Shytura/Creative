@@ -25,6 +25,7 @@ import {
   filterArtworks,
   filterBooks,
   flagEmoji,
+  isbnFromBarcode,
   isValidIsbn,
   itemIdsOf,
   migrateRow,
@@ -476,6 +477,14 @@ describe('isbn', () => {
     expect(normalizeIsbn('ISBN 978 3 596 29431 2')).toBe('9783596294312');
     expect(normalizeIsbn('0-14-044913-2')).toBe('9780140449136');
     expect(normalizeIsbn('ISBN-10: 080442957x')).toMatch(/^978080442957\d$/);
+  });
+
+  it('reads ISBNs from book barcodes only', () => {
+    expect(isbnFromBarcode('9783596294312')).toBe('9783596294312');
+    expect(isbnFromBarcode('4006381333931')).toBeUndefined(); // a pen
+    expect(isbnFromBarcode('51995')).toBeUndefined(); // the price add-on
+    expect(isbnFromBarcode('0140449132')).toBeUndefined(); // ISBN-10 is never a barcode
+    expect(isbnFromBarcode('9783596294313')).toBeUndefined();
   });
 
   it('rejects wrong check digits and other numbers', () => {

@@ -335,6 +335,16 @@ export const en: Translation<typeof de> = {
       favoriteHint: 'Shows up in the salon and can be filtered.',
       processing: 'Preparing cover …',
     },
+    scan: {
+      button: 'Scan ISBN',
+      hint: 'Hold the barcode on the back inside the frame.',
+      torch: 'Light',
+      stop: 'Stop scanning',
+      insecure: 'The camera only works over a secure connection (https). Just type the ISBN.',
+      denied: 'Mnemo may not use the camera. Allow it in the browser settings or type the ISBN.',
+      noCamera: 'No camera found. Just type the ISBN.',
+      failed: 'The scanner could not start. Just type the ISBN.',
+    },
     add: {
       eyebrow: 'Add book',
       title: 'What is on your desk?',

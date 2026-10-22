@@ -36,3 +36,12 @@ export function normalizeIsbn(input: string): string | undefined {
 }
 
 export const isValidIsbn = (input: string) => normalizeIsbn(input) !== undefined;
+
+/**
+ * The ISBN in a scanned barcode. Books carry an EAN-13 starting with 978 or 979 ("Bookland");
+ * other product codes and the small price add-on next to it are ignored.
+ */
+export function isbnFromBarcode(raw: string): string | undefined {
+  const digits = raw.trim();
+  return /^97[89]\d{10}$/.test(digits) ? normalizeIsbn(digits) : undefined;
+}
