@@ -1,8 +1,17 @@
 import { normalizeIsbn } from '../lib/isbn';
-import { createId, nowIso, todayIsoDate } from '../lib/misc';
-import type { Book, BookDraft, BookStatus, Loan, Quote, Reading } from '../model/entities';
+import { createId, normalizeName, nowIso, todayIsoDate } from '../lib/misc';
+import type {
+  Book,
+  BookDraft,
+  BookOwnership,
+  BookStatus,
+  Collection,
+  Loan,
+  Quote,
+  Reading,
+} from '../model/entities';
 import type { MnemoStore } from '../repositories';
-import { unlinkFromCollections } from './collections';
+import { itemIdsOf, unlinkFromCollections } from './collections';
 import { resolveCreatorIds } from './creators';
 
 async function getBook(store: MnemoStore, id: string): Promise<Book> {
@@ -136,4 +145,91 @@ export async function removeBook(store: MnemoStore, id: string): Promise<void> {
     for (const mediaId of book.mediaIds) await store.media.delete(mediaId);
     await store.books.delete(id);
   });
+}
+
+// ── Queries ────────────────────────────────────────────────────────────────
+
+export const bookSorts = ['added', 'title', 'author', 'finished'] as const;
+export type BookSort = (typeof bookSorts)[number];
+
+export interface BookFilter {
+  query?: string;
+  status?: BookStatus;
+  ownership?: BookOwnership;
+  lent?: boolean;
+  favorite?: boolean;
+  author?: string;
+  tag?: string;
+  collectionId?: string;
+  /** Ignored inside a list, which keeps its own order. */
+  sort?: BookSort;
+}
+
+/** The date a book was last finished, if ever. */
+export function lastFinished(book: Pick<Book, 'readings'>): string | undefined {
+  return book.readings
+    .flatMap((r) => (r.finishedOn ? [r.finishedOn] : []))
+    .sort()
+    .at(-1);
+}
+
+/** The surname-ish sort key of the first author: `Thomas Mann` → `mann thomas`. */
+function authorKey(book: Book): string {
+  const name = normalizeName(book.authors[0] ?? '');
+  const parts = name.split(' ');
+  return parts.length > 1 ? [parts.at(-1), ...parts.slice(0, -1)].join(' ') : name;
+}
+
+const BY: Record<BookSort, (a: Book, b: Book) => number> = {
+  added: (a, b) => b.createdAt.localeCompare(a.createdAt),
+  title: (a, b) => a.title.localeCompare(b.title),
+  author: (a, b) => authorKey(a).localeCompare(authorKey(b)) || a.title.localeCompare(b.title),
+  finished: (a, b) => (lastFinished(b) ?? '').localeCompare(lastFinished(a) ?? ''),
+};
+
+export function filterBooks(
+  books: readonly Book[],
+  filter: BookFilter,
+  collections: readonly Collection[] = [],
+): Book[] {
+  const terms = filter.query ? normalizeName(filter.query).split(' ').filter(Boolean) : [];
+  const collection = filter.collectionId
+    ? collections.find((c) => c.id === filter.collectionId)
+    : undefined;
+  const order = collection
+    ? new Map(itemIdsOf(collection, 'book').map((id, i) => [id, i]))
+    : undefined;
+  const author = filter.author ? normalizeName(filter.author) : undefined;
+
+  const result = books.filter((b) => {
+    if (filter.status && b.status !== filter.status) return false;
+    if (filter.ownership && b.ownership !== filter.ownership) return false;
+    if (filter.lent && !b.loan) return false;
+    if (filter.favorite && !b.favorite) return false;
+    if (author && !b.authors.some((a) => normalizeName(a) === author)) return false;
+    if (filter.tag && !b.tags.includes(filter.tag)) return false;
+    if (order && !order.has(b.id)) return false;
+    if (terms.length > 0) {
+      const haystack = normalizeName(
+        [
+          b.title,
+          b.subtitle,
+          ...b.authors,
+          b.publisher,
+          b.year,
+          b.isbn,
+          b.notes,
+          b.loan?.name,
+          ...b.tags,
+          ...b.quotes.map((q) => q.text),
+        ].join(' '),
+      );
+      if (!terms.every((t) => haystack.includes(t))) return false;
+    }
+    return true;
+  });
+
+  return order
+    ? result.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+    : result.sort(BY[filter.sort ?? 'added']);
 }

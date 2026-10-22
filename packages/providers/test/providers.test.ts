@@ -391,7 +391,7 @@ describe('book catalogues', () => {
     expect(mapOpenLibraryBook('9783596294312', book)).toMatchObject({
       externalId: 'OL18348219M',
       title: 'Buddenbrooks',
-      subtitle: 'Verfall einer Familie : Roman',
+      subtitle: 'Verfall einer Familie. Roman',
       authors: ['Thomas Mann'],
       publisher: 'Fischer Taschenbuch',
       year: '1989',
@@ -406,7 +406,7 @@ describe('book catalogues', () => {
       provider: 'dnb',
       externalId: '1362379786',
       title: 'Buddenbrooks',
-      subtitle: 'Verfall einer Familie : Roman',
+      subtitle: 'Verfall einer Familie. Roman',
       authors: ['Thomas Mann'],
       isbn: '9783596294312',
       publisher: 'Fischer Taschenbuch',

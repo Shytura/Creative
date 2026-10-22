@@ -33,7 +33,6 @@ export const artModule: AppModule = {
       icon: SearchIcon,
       order: 50,
       placement: 'main',
-      mobile: true,
     },
   ],
   quickAdd: [

@@ -1,6 +1,6 @@
 import { compact, fetchJson, query } from '../http';
 import type { BookSearchProvider, BookSearchResult } from '../types';
-import { firstIsbn, languageFromMarc, yearOf } from './common';
+import { cleanSubtitle, firstIsbn, languageFromMarc, yearOf } from './common';
 
 interface OpenLibraryEdition {
   key: string;
@@ -68,7 +68,7 @@ export function mapOpenLibrarySearch(response: OpenLibrarySearchResponse): BookS
       provider: 'openlibrary',
       externalId: olid(edition?.key ?? work.key),
       title: edition?.title ?? work.title,
-      subtitle: edition?.subtitle ?? work.subtitle,
+      subtitle: cleanSubtitle(edition?.subtitle ?? work.subtitle),
       authors: work.author_name ?? [],
       isbn: firstIsbn(edition?.isbn),
       publisher: edition?.publisher?.[0],
@@ -86,7 +86,7 @@ export function mapOpenLibraryBook(isbn: string, book: OpenLibraryBook): BookSea
     provider: 'openlibrary',
     externalId: olid(book.key),
     title: book.title,
-    subtitle: book.subtitle,
+    subtitle: cleanSubtitle(book.subtitle),
     authors: (book.authors ?? []).map((a) => a.name),
     isbn,
     publisher: book.publishers?.[0]?.name,

@@ -1,6 +1,6 @@
 import { compact, fetchText, query } from '../http';
 import type { BookSearchProvider, BookSearchResult } from '../types';
-import { firstIsbn, languageFromMarc, yearOf } from './common';
+import { cleanSubtitle, firstIsbn, languageFromMarc, yearOf } from './common';
 
 /**
  * Deutsche Nationalbibliothek: every book published in Germany, Austria and Switzerland, no
@@ -57,7 +57,7 @@ function authorsOf(creators: readonly string[]): string[] {
 function splitTitle(raw: string): { title: string; subtitle?: string } {
   const main = raw.replace(/^\[[^\]]*\]\s*;\s*/, '').split(' / ')[0]!;
   const [title, ...rest] = main.split(' : ');
-  return { title: title!.trim(), subtitle: rest.join(' : ').trim() || undefined };
+  return { title: title!.trim(), subtitle: cleanSubtitle(rest.join(' : ')) };
 }
 
 export function mapDnbRecord(record: DcRecord): BookSearchResult | undefined {

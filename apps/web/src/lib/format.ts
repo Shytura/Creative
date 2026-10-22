@@ -45,6 +45,15 @@ export function useFormat() {
     }
   };
 
+  const language = (code: string | undefined) => {
+    if (!code) return '';
+    try {
+      return new Intl.DisplayNames([locale], { type: 'language' }).of(code) ?? code;
+    } catch {
+      return code;
+    }
+  };
+
   /** `1632–1675`, `* 1940`, `† 1528`; negative years are BCE. */
   const lifespan = ({ birthYear: b, deathYear: d }: { birthYear?: number; deathYear?: number }) => {
     const year = (y: number) => (y < 0 ? `${-y} ${t('creator.bce')}` : String(y));
@@ -54,7 +63,7 @@ export function useFormat() {
     return '';
   };
 
-  return { locale, date, number, bytes, country, lifespan };
+  return { locale, date, number, bytes, country, language, lifespan };
 }
 
 /** Roman numerals for the editorial section numbering. */

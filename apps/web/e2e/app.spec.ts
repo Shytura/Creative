@@ -204,3 +204,68 @@ test('artists become people with their own page', async ({ page }) => {
   await page.getByRole('link', { name: 'Albrecht Dürer' }).click();
   await expect(page).toHaveURL(/\/creator\//);
 });
+
+test('a book found by ISBN goes on the shelf, gets read and quoted', async ({ page }) => {
+  // Catalogues answer from fixtures; routes added later take precedence over the block above.
+  await page.route('https://openlibrary.org/api/books**', (route) =>
+    route.fulfill({
+      json: {
+        'ISBN:9783596294312': {
+          key: '/books/OL18348219M',
+          title: 'Buddenbrooks',
+          subtitle: 'Verfall einer Familie : Roman',
+          authors: [{ name: 'Thomas Mann' }],
+          number_of_pages: 758,
+          publishers: [{ name: 'Fischer Taschenbuch' }],
+          publish_date: '1989',
+        },
+      },
+    }),
+  );
+  await page.route('https://services.dnb.de/**', (route) =>
+    route.fulfill({ body: '<searchRetrieveResponse><records></records></searchRetrieveResponse>' }),
+  );
+
+  await page.goto('/library');
+  await page.getByRole('button', { name: 'Erstes Buch hinzufügen' }).click();
+  const add = page.getByRole('dialog');
+  await add.getByLabel('Titel, Autor:in oder ISBN').fill('3-596-29431-2');
+  await expect(add.getByText('Gefunden über die ISBN')).toBeVisible();
+  await add.getByRole('button', { name: 'Übernehmen' }).click();
+
+  const form = page.getByRole('dialog');
+  await expect(form.getByLabel('Untertitel')).toHaveValue('Verfall einer Familie. Roman');
+  await form.getByText('Lese gerade', { exact: true }).click();
+  await form.getByRole('button', { name: 'Speichern' }).click();
+  await expect(form).toBeHidden();
+
+  await expect(page.getByRole('region', { name: 'Lese gerade' })).toContainText('Buddenbrooks');
+  await page
+    .getByRole('link', { name: /Buddenbrooks/ })
+    .last()
+    .click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Buddenbrooks' })).toBeVisible();
+
+  await page.getByLabel('Aktuelle Seite').fill('379');
+  await page.getByLabel('Aktuelle Seite').press('Enter');
+  await expect(page.getByText('50 %')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Zitat festhalten' }).first().click();
+  const quote = page.getByRole('dialog');
+  await expect(quote.getByLabel('Seite')).toHaveValue('379');
+  await quote
+    .getByLabel('Zitat')
+    .fill('Wir sind nicht dazu da, unser eigenes kleines Glück zu suchen.');
+  await quote.getByRole('button', { name: 'Speichern' }).click();
+  await expect(quote).toBeHidden();
+  await expect(page.getByText('S. 379')).toBeVisible();
+
+  await page.getByText('Gelesen', { exact: true }).click();
+  await expect(page.getByText(/^Gelesen am /)).toBeVisible();
+
+  // Authors become people, and quotes are searchable from the shelf.
+  await page.getByRole('link', { name: 'Thomas Mann', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Thomas Mann' })).toBeVisible();
+  await page.goto('/library?q=Glück');
+  await expect(page.getByText('1 Buch')).toBeVisible();
+});

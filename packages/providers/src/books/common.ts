@@ -45,3 +45,8 @@ export function firstIsbn(candidates: readonly string[] | undefined): string | u
 export function yearOf(date: string | number | undefined): string | undefined {
   return date === undefined ? undefined : String(date).match(/\d{4}/)?.[0];
 }
+
+/** Catalogues separate subtitle parts with ` : ` (ISBD); readers expect `Part. Part`. */
+export function cleanSubtitle(subtitle: string | undefined): string | undefined {
+  return subtitle?.replace(/\s+[:;]\s+/g, '. ').trim() || undefined;
+}

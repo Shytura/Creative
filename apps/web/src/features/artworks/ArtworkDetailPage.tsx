@@ -1,6 +1,5 @@
 import {
   type Artwork,
-  accentFromPalette,
   collectionHas,
   type ItemRef,
   onColor,
@@ -35,7 +34,7 @@ import {
   PencilIcon,
   Trash2Icon,
 } from 'lucide-react';
-import { type CSSProperties, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -49,16 +48,15 @@ import {
   useVisits,
 } from '../../app/data';
 import { useDialogs } from '../../app/dialogs';
-import { useResolvedTheme } from '../../app/shell/Appearance';
 import { useStore } from '../../app/store';
 import { ArtworkCard } from '../../components/ArtworkCard';
 import { Confirm, Fact, Flag } from '../../components/bits';
 import { ImageViewer } from '../../components/ImageViewer';
 import { MediaImage } from '../../components/MediaImage';
+import { usePaletteAccent } from '../../lib/accent';
 import { useFormat } from '../../lib/format';
 
 const routeApi = getRouteApi('/artwork/$artworkId');
-const PAPER = { light: '#f3eee5', dark: '#12110f' };
 
 export function ArtworkDetailPage() {
   const { t } = useTranslation();
@@ -68,7 +66,6 @@ export function ArtworkDetailPage() {
   const store = useStore();
   const navigate = useNavigate();
   const dialogs = useDialogs();
-  const theme = useResolvedTheme();
   const format = useFormat();
   const { venues, placeOfVenue } = useLookups();
   const visits = useVisits();
@@ -84,12 +81,7 @@ export function ArtworkDetailPage() {
   const fullUrl = useMediaUrl(mediaId, 'full');
 
   // The page borrows its accent colour from the artwork itself.
-  const accentStyle = useMemo(() => {
-    const accent = accentFromPalette(artwork?.palette ?? [], PAPER[theme]);
-    return accent
-      ? ({ '--mn-accent': accent, '--mn-accent-ink': onColor(accent) } as CSSProperties)
-      : undefined;
-  }, [artwork?.palette, theme]);
+  const accentStyle = usePaletteAccent(artwork?.palette);
 
   const related = useMemo(() => {
     if (!artwork || !allArtworks) return { byArtist: [], atVenue: [] };

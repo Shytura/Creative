@@ -23,6 +23,7 @@ import {
   entityNames,
   epochOf,
   filterArtworks,
+  filterBooks,
   flagEmoji,
   isValidIsbn,
   itemIdsOf,
@@ -517,5 +518,67 @@ describe('reading history', () => {
     expect(nextReadings(at('read', [{ finishedOn: '2020-01-01' }]), 'unread', 'x')).toEqual([
       { finishedOn: '2020-01-01' },
     ]);
+  });
+});
+
+describe('library queries', () => {
+  const books = [
+    book('b1', {
+      title: 'Buddenbrooks',
+      authors: ['Thomas Mann'],
+      status: 'read',
+      readings: [{ finishedOn: '2021-01-01' }],
+      createdAt: '2024-01-01T00:00:00Z',
+    }),
+    book('b2', {
+      title: 'Der Process',
+      authors: ['Franz Kafka'],
+      status: 'reading',
+      loan: { name: 'Mia', since: '2025-01-01' },
+      createdAt: '2024-03-01T00:00:00Z',
+    }),
+    book('b3', {
+      title: 'Am Ende',
+      authors: ['Ilse Aichinger'],
+      ownership: 'wishlist',
+      quotes: [{ id: 'q', text: 'Die größere Hoffnung', createdAt: '' }],
+      readings: [{ finishedOn: '2023-05-01' }],
+      createdAt: '2024-02-01T00:00:00Z',
+    }),
+  ];
+
+  it('filters by status, ownership, loans, author and text', () => {
+    const ids = (filter: Parameters<typeof filterBooks>[1]) =>
+      filterBooks(books, filter).map((b) => b.id);
+    expect(ids({ status: 'reading' })).toEqual(['b2']);
+    expect(ids({ ownership: 'wishlist' })).toEqual(['b3']);
+    expect(ids({ lent: true })).toEqual(['b2']);
+    expect(ids({ author: 'thomas mann' })).toEqual(['b1']);
+    expect(ids({ query: 'hoffnung' })).toEqual(['b3']); // quotes are searchable
+    expect(ids({ query: 'mia' })).toEqual(['b2']); // and who borrowed a book
+  });
+
+  it('sorts by date added, title, author surname and last finished', () => {
+    const ids = (sort: Parameters<typeof filterBooks>[1]['sort']) =>
+      filterBooks(books, { sort }).map((b) => b.id);
+    expect(ids(undefined)).toEqual(['b2', 'b3', 'b1']);
+    expect(ids('title')).toEqual(['b3', 'b1', 'b2']);
+    expect(ids('author')).toEqual(['b3', 'b2', 'b1']);
+    expect(ids('finished')).toEqual(['b3', 'b1', 'b2']);
+  });
+
+  it('keeps the order of a list', () => {
+    const list = collectionSchema.parse({
+      ...meta('l'),
+      name: 'Liste',
+      items: [
+        { kind: 'book', id: 'b3' },
+        { kind: 'artwork', id: 'a1' },
+        { kind: 'book', id: 'b1' },
+      ],
+    });
+    expect(
+      filterBooks(books, { collectionId: 'l', sort: 'title' }, [list]).map((b) => b.id),
+    ).toEqual(['b3', 'b1']);
   });
 });
