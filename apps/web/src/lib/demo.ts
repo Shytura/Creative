@@ -1,4 +1,11 @@
-import { createId, type MnemoStore, saveArtwork, type VenueKind } from '@mnemo/core';
+import {
+  type BookDraft,
+  createId,
+  type MnemoStore,
+  saveArtwork,
+  saveBook,
+  type VenueKind,
+} from '@mnemo/core';
 import { saveRemoteImage } from './media';
 
 type L = { de: string; en: string };
@@ -251,6 +258,78 @@ const TAGS_EN: Record<string, string> = {
  * Seeds a small, realistic sample archive using public-domain works from Wikimedia Commons.
  * Images are downloaded and stored locally, so palettes and offline use work like real data.
  */
+/** Books with ties to the works above; no covers, so the cloth bindings show. */
+const BOOKS: Array<{ draft: (locale: 'de' | 'en') => BookDraft; dutch?: boolean }> = [
+  {
+    draft: (locale) => ({
+      title: locale === 'de' ? 'Briefe an Theo' : 'Letters to Theo',
+      authors: ['Vincent van Gogh'],
+      year: '1914',
+      pageCount: 480,
+      status: 'reading',
+      readings: [{ startedOn: '2026-09-20' }],
+      currentPage: 142,
+      tags: [locale === 'de' ? 'Briefe' : 'letters'],
+    }),
+  },
+  {
+    draft: (locale) => ({
+      title: locale === 'de' ? 'Das Mädchen mit dem Perlenohrring' : 'Girl with a Pearl Earring',
+      authors: ['Tracy Chevalier'],
+      year: '1999',
+      pageCount: 288,
+      status: 'read',
+      readings: [{ startedOn: '2025-07-30', finishedOn: '2025-08-14' }],
+      rating: 4,
+      favorite: true,
+    }),
+    dutch: true,
+  },
+  {
+    draft: (locale) => ({
+      title: locale === 'de' ? 'Die Geschichte der Kunst' : 'The Story of Art',
+      authors: ['E. H. Gombrich'],
+      year: '1950',
+      pageCount: 688,
+      status: 'read',
+      readings: [{ startedOn: '2024-09-01', finishedOn: '2024-11-02' }],
+      rating: 5,
+      quotes: [
+        {
+          id: createId(),
+          page: 15,
+          createdAt: '2024-09-01T20:00:00Z',
+          text:
+            locale === 'de'
+              ? 'Eigentlich gibt es gar keine Kunst. Es gibt nur Künstler.'
+              : 'There really is no such thing as Art. There are only artists.',
+        },
+      ],
+    }),
+  },
+  {
+    draft: (locale) => ({
+      title: 'Buddenbrooks',
+      subtitle: locale === 'de' ? 'Verfall einer Familie' : 'The Decline of a Family',
+      authors: ['Thomas Mann'],
+      isbn: '9783596294312',
+      year: '1901',
+      pageCount: 758,
+      language: 'de',
+      format: 'paperback',
+      loan: { name: 'Lena', since: '2026-09-01' },
+    }),
+  },
+  {
+    draft: (locale) => ({
+      title: locale === 'de' ? 'Die Ringe des Saturn' : 'The Rings of Saturn',
+      authors: ['W. G. Sebald'],
+      year: '1995',
+      ownership: 'wishlist',
+    }),
+  },
+];
+
 export async function seedDemo(
   store: MnemoStore,
   locale: 'de' | 'en',
@@ -331,9 +410,18 @@ export async function seedDemo(
         : 'Works I keep coming back to.',
     items: favorites.map((id) => ({ kind: 'artwork' as const, id })),
   });
+  const dutchBooks: string[] = [];
+  for (const b of BOOKS) {
+    const book = await saveBook(store, b.draft(locale));
+    if (b.dutch) dutchBooks.push(book.id);
+  }
+
   await store.collections.create({
     name: locale === 'de' ? 'Niederländische Meister' : 'Dutch Masters',
-    items: dutch.map((id) => ({ kind: 'artwork' as const, id })),
+    items: [
+      ...dutch.map((id) => ({ kind: 'artwork' as const, id })),
+      ...dutchBooks.map((id) => ({ kind: 'book' as const, id })),
+    ],
   });
 
   await store.trips.create({

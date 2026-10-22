@@ -1,5 +1,6 @@
 import type { Dictionary } from '@mnemo/i18n';
 import { type ComponentType, type LazyExoticComponent, lazy } from 'react';
+import type { CollectibleViews } from './collectibles';
 import type { DialogProps, DialogSpec, DialogType } from './dialogs';
 
 type Icon = ComponentType<{ className?: string }>;
@@ -40,6 +41,8 @@ export interface AppModule {
   nav?: NavEntry[];
   quickAdd?: QuickAddEntry[];
   dialogs?: DialogComponents;
+  /** Views for the collectible kinds this module owns. */
+  collectibles?: Partial<CollectibleViews>;
 }
 
 /** Loads a dialog component on first use so forms stay out of the initial bundle. */

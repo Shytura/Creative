@@ -2,6 +2,7 @@ import type { BookOwnership, BookStatus } from '@mnemo/core';
 import type { BookSearchResult } from '@mnemo/providers';
 import { LibraryBigIcon } from 'lucide-react';
 import { type AppModule, lazyDialog } from '../../app/modules';
+import { BookItemCard } from '../../components/BookCard';
 
 declare module '../../app/dialogs' {
   interface DialogRegistry {
@@ -41,6 +42,12 @@ export const libraryModule: AppModule = {
       group: 'record',
     },
   ],
+  collectibles: {
+    book: {
+      Card: BookItemCard,
+      href: (id) => `/book/${id}`,
+    },
+  },
   dialogs: {
     book: lazyDialog(
       () => import('../../features/library/BookForm'),

@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { BookmarkIcon, HeartIcon } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { CollectibleCardProps } from '../app/collectibles';
 import { useLookups } from '../app/data';
 import { MediaImage } from './MediaImage';
 
@@ -79,6 +80,11 @@ export function ArtworkCard({
       </Link>
     </figure>
   );
+}
+
+/** The artwork card in grids that mix kinds; cropped so rows line up. */
+export function ArtworkItemCard({ item, ...rest }: CollectibleCardProps<'artwork'>) {
+  return <ArtworkCard artwork={item} crop {...rest} />;
 }
 
 /** A typographic stand-in for artworks without image. */

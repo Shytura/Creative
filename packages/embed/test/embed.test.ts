@@ -1,4 +1,4 @@
-import { type Archive, parseArchive } from '@mnemo/core';
+import { ARCHIVE_VERSION, type Archive, parseArchive } from '@mnemo/core';
 import { beforeAll, describe, expect, it } from 'vitest';
 import sample from '../../../apps/embed-demo/public/sample-collection.json';
 import { isArchive, type MnemoGallery, selectItems } from '../src';
@@ -27,6 +27,30 @@ describe('selectItems', () => {
       'a3',
       'a5',
     ]);
+  });
+
+  it('shows only the artworks of lists that also hold books', () => {
+    const mixed = parseArchive({
+      ...sample,
+      version: ARCHIVE_VERSION,
+      books: [
+        { id: 'b1', title: 'Briefe', createdAt: '', updatedAt: '', schemaVersion: ARCHIVE_VERSION },
+      ],
+      collections: [
+        {
+          id: 'mixed',
+          name: 'Gemischt',
+          createdAt: '',
+          updatedAt: '',
+          schemaVersion: ARCHIVE_VERSION,
+          items: [
+            { kind: 'book', id: 'b1' },
+            { kind: 'artwork', id: 'a2' },
+          ],
+        },
+      ],
+    });
+    expect(selectItems(mixed, { collection: 'Gemischt' }).items.map((i) => i.id)).toEqual(['a2']);
   });
 
   it('filters and limits', () => {

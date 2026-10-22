@@ -1,6 +1,7 @@
-import type { ArtworkStatus, ItemRef } from '@mnemo/core';
+import type { ArtworkStatus } from '@mnemo/core';
 import { ImagesIcon, SearchIcon } from 'lucide-react';
 import { type AppModule, lazyDialog } from '../../app/modules';
+import { ArtworkItemCard } from '../../components/ArtworkCard';
 
 declare module '../../app/dialogs' {
   interface DialogRegistry {
@@ -11,7 +12,6 @@ declare module '../../app/dialogs' {
       status?: ArtworkStatus;
       files?: File[];
     };
-    collection: { collectionId?: string; addItem?: ItemRef };
   }
 }
 
@@ -44,14 +44,16 @@ export const artModule: AppModule = {
       group: 'record',
     },
   ],
+  collectibles: {
+    artwork: {
+      Card: ArtworkItemCard,
+      href: (id) => `/artwork/${id}`,
+    },
+  },
   dialogs: {
     artwork: lazyDialog(
       () => import('../../features/artworks/ArtworkForm'),
       (m) => m.ArtworkFormDialog,
-    ),
-    collection: lazyDialog(
-      () => import('../../features/artworks/CollectionForm'),
-      (m) => m.CollectionFormDialog,
     ),
   },
 };

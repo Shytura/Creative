@@ -1,3 +1,5 @@
+import { collectibleKinds } from '@mnemo/core';
+import type { CollectibleViews } from '../app/collectibles';
 import type { AppModule, DialogComponents } from '../app/modules';
 import { artModule } from './art';
 import { homeModule } from './home';
@@ -27,3 +29,15 @@ export const dialogComponents: DialogComponents = Object.assign(
   {},
   ...appModules.map((m) => m.dialogs ?? {}),
 );
+
+/** One view per collectible kind; a kind without a module to show it fails at startup. */
+export const collectibleViews: CollectibleViews = (() => {
+  const views: Partial<CollectibleViews> = Object.assign(
+    {},
+    ...appModules.map((m) => m.collectibles ?? {}),
+  );
+  const missing = collectibleKinds.filter((kind) => !views[kind]);
+  if (missing.length > 0)
+    throw new Error(`No module shows collectibles of kind ${missing.join(', ')}`);
+  return views as CollectibleViews;
+})();

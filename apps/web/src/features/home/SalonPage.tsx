@@ -1,5 +1,5 @@
 import { todayIsoDate } from '@mnemo/core';
-import { Button, SectionTitle, Skeleton, Stat } from '@mnemo/ui';
+import { Button, cn, SectionTitle, Skeleton, Stat } from '@mnemo/ui';
 import { Link } from '@tanstack/react-router';
 import {
   ArrowRightIcon,
@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useArtworks,
+  useBooks,
   useInsights,
   useLookups,
   useProviderContext,
@@ -27,6 +28,7 @@ import { useStore } from '../../app/store';
 import { ArtworkCard } from '../../components/ArtworkCard';
 import { Flag } from '../../components/bits';
 import { MediaImage } from '../../components/MediaImage';
+import { ReadingNow } from '../../components/ReadingNow';
 import { useWikiSummary } from '../../components/WikiSummary';
 import { seedDemo } from '../../lib/demo';
 import { useFormat } from '../../lib/format';
@@ -40,8 +42,9 @@ function greetingKey(hour: number) {
 export function SalonPage() {
   const artworks = useArtworks();
   const visits = useVisits();
+  const books = useBooks();
 
-  if (!artworks || !visits) {
+  if (!artworks || !visits || !books) {
     return (
       <div className="grid gap-12 lg:grid-cols-[7fr_5fr]">
         <Skeleton className="aspect-[4/3]" />
@@ -52,7 +55,7 @@ export function SalonPage() {
       </div>
     );
   }
-  if (artworks.length === 0 && visits.length === 0) return <Welcome />;
+  if (artworks.length === 0 && visits.length === 0 && books.length === 0) return <Welcome />;
   return <Salon />;
 }
 
@@ -128,7 +131,12 @@ function Salon() {
       )}
 
       {insights && (
-        <section className="grid grid-cols-2 gap-x-6 gap-y-10 border-y border-line py-12 md:grid-cols-4">
+        <section
+          className={cn(
+            'grid grid-cols-2 gap-x-6 gap-y-10 border-y border-line py-12',
+            insights.library.books > 0 ? 'md:grid-cols-5' : 'md:grid-cols-4',
+          )}
+        >
           <Stat
             value={insights.totals.countries}
             label={t('stats.countries', { count: insights.totals.countries })}
@@ -145,6 +153,30 @@ function Salon() {
             value={insights.totals.artworks}
             label={t('stats.artworks', { count: insights.totals.artworks })}
           />
+          {insights.library.books > 0 && (
+            <Stat
+              value={insights.library.books}
+              label={t('stats.books', { count: insights.library.books })}
+            />
+          )}
+        </section>
+      )}
+
+      {insights && insights.library.reading.length > 0 && (
+        <section>
+          <SectionTitle
+            action={
+              <Link
+                to="/library"
+                className="eyebrow inline-flex items-center gap-1.5 text-ink-3 hover:text-accent"
+              >
+                {t('salon.toLibrary')} <ArrowRightIcon className="size-3.5" />
+              </Link>
+            }
+          >
+            {t('salon.reading')}
+          </SectionTitle>
+          <ReadingNow books={insights.library.reading} bare />
         </section>
       )}
 

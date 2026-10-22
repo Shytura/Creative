@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { BookmarkIcon, HandshakeIcon, HeartIcon } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { CollectibleCardProps } from '../app/collectibles';
 import { BookCover } from './BookCover';
 
 interface BookCardProps {
@@ -63,6 +64,10 @@ export function BookCard({ book, className, style }: BookCardProps) {
       </Link>
     </figure>
   );
+}
+
+export function BookItemCard({ item, ...rest }: CollectibleCardProps<'book'>) {
+  return <BookCard book={item} {...rest} />;
 }
 
 function Badge({

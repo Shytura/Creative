@@ -28,7 +28,6 @@ import {
   HeartIcon,
   LayoutGridIcon,
   ListIcon,
-  PencilIcon,
   PlusIcon,
   SearchIcon,
   SlidersHorizontalIcon,
@@ -171,13 +170,10 @@ export function CollectionPage() {
         actions={
           <>
             {activeCollection && (
-              <Button
-                variant="outline"
-                onClick={() =>
-                  dialogs.open({ type: 'collection', collectionId: activeCollection.id })
-                }
-              >
-                <PencilIcon /> {t('common.edit')}
+              <Button asChild variant="outline">
+                <Link to="/list/$collectionId" params={{ collectionId: activeCollection.id }}>
+                  <ListIcon /> {t('lists.open')}
+                </Link>
               </Button>
             )}
             <Button onClick={() => dialogs.open({ type: 'artwork' })}>

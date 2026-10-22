@@ -1,4 +1,4 @@
-import { epochOf, epochs, parseYear } from '@mnemo/core';
+import { epochOf, epochs, type LibraryInsight, parseYear } from '@mnemo/core';
 import { EmptyState, PageHeader, SectionTitle, Stat } from '@mnemo/ui';
 import { Link } from '@tanstack/react-router';
 import { useMemo } from 'react';
@@ -30,7 +30,7 @@ export function InsightsPage() {
   if (!insights) return null;
   const { totals } = insights;
 
-  if (totals.visits === 0 && totals.artworks === 0) {
+  if (totals.visits === 0 && totals.artworks === 0 && insights.library.books === 0) {
     return (
       <>
         <PageHeader eyebrow={t('insights.eyebrow')} title={t('insights.title')} />
@@ -99,16 +99,20 @@ export function InsightsPage() {
             />
           </section>
         )}
-        <section>
-          <SectionTitle>{t('insights.epochs')}</SectionTitle>
-          <ColumnChart
-            data={epochCounts}
-            caption={t('insights.epochs')}
-            valueLabel={(n) => t('stats.artworks', { count: n })}
-            compactLabels
-          />
-        </section>
+        {totals.artworks > 0 && (
+          <section>
+            <SectionTitle>{t('insights.epochs')}</SectionTitle>
+            <ColumnChart
+              data={epochCounts}
+              caption={t('insights.epochs')}
+              valueLabel={(n) => t('stats.artworks', { count: n })}
+              compactLabels
+            />
+          </section>
+        )}
       </div>
+
+      {insights.library.books > 0 && <LibrarySection library={insights.library} />}
 
       <div className="mt-20 grid grid-cols-1 gap-16 lg:grid-cols-3">
         <section>
@@ -156,6 +160,39 @@ interface Datum {
   key: string;
   label: string;
   value: number;
+}
+
+function LibrarySection({ library }: { library: LibraryInsight }) {
+  const { t } = useTranslation();
+  const format = useFormat();
+  return (
+    <section className="mt-20">
+      <SectionTitle>{t('insights.library')}</SectionTitle>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-12 py-6 md:grid-cols-4">
+        <Stat value={library.books} label={t('stats.books', { count: library.books })} />
+        <Stat value={library.read} label={t('stats.booksRead', { count: library.read })} />
+        <Stat
+          value={format.number(library.pagesRead)}
+          label={t('stats.pages', { count: library.pagesRead })}
+        />
+        <Stat value={library.lent.length} label={t('stats.lent', { count: library.lent.length })} />
+      </div>
+      {library.readByYear.length > 0 && (
+        <div className="mt-12 max-w-3xl">
+          <p className="eyebrow mb-4 text-ink-3">{t('insights.readPerYear')}</p>
+          <ColumnChart
+            data={library.readByYear.map((y) => ({
+              key: String(y.year),
+              label: String(y.year),
+              value: y.count,
+            }))}
+            caption={t('insights.readPerYear')}
+            valueLabel={(n) => t('stats.booksRead', { count: n })}
+          />
+        </div>
+      )}
+    </section>
+  );
 }
 
 /** Single-series column chart: thin accent bars, rounded data end, value on hover. */

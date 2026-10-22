@@ -365,7 +365,7 @@ export function ArtworkDetailPage() {
           {(artwork.tags.length > 0 || memberOf.length > 0) && (
             <div className="mt-8 flex flex-wrap gap-2">
               {memberOf.map((c) => (
-                <Link key={c.id} to="/collection" search={{ collection: c.id }}>
+                <Link key={c.id} to="/list/$collectionId" params={{ collectionId: c.id }}>
                   <Chip>{c.name}</Chip>
                 </Link>
               ))}

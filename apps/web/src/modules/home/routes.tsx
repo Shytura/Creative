@@ -5,6 +5,10 @@ import { SalonPage } from '../../features/home/SalonPage';
 export const homeRoutes = [
   route('/', SalonPage),
   route(
+    '/list/$collectionId',
+    lazyRouteComponent(() => import('../../features/lists/ListPage'), 'ListPage'),
+  ),
+  route(
     '/insights',
     lazyRouteComponent(() => import('../../features/insights/InsightsPage'), 'InsightsPage'),
   ),

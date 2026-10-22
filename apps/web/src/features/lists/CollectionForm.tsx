@@ -1,4 +1,4 @@
-import type { Collection } from '@mnemo/core';
+import { type Collection, itemIdsOf } from '@mnemo/core';
 import { Button, Dialog, DialogContent, Field, Input, Textarea } from '@mnemo/ui';
 import { useNavigate } from '@tanstack/react-router';
 import { type FormEvent, useState } from 'react';
@@ -42,7 +42,9 @@ function CollectionForm({
         description,
         items: spec.addItem ? [spec.addItem] : [],
       });
-      if (!spec.addItem) void navigate({ to: '/collection', search: { collection: created.id } });
+      if (!spec.addItem) {
+        void navigate({ to: '/list/$collectionId', params: { collectionId: created.id } });
+      }
     }
     toast.success(t('collection.saved'));
     onClose();
@@ -63,7 +65,10 @@ function CollectionForm({
               onConfirm={async () => {
                 await store.collections.delete(collection.id);
                 onClose();
-                void navigate({ to: '/collection', search: {} });
+                // Back to where most of its items live.
+                const books = itemIdsOf(collection, 'book').length;
+                const artworks = itemIdsOf(collection, 'artwork').length;
+                void navigate({ to: books > artworks ? '/library' : '/collection', search: {} });
               }}
               trigger={(open) => (
                 <Button variant="ghost" className="mr-auto text-danger" onClick={open}>

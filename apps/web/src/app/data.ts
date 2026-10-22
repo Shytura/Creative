@@ -1,5 +1,9 @@
 import {
   type Artwork,
+  type CollectibleKind,
+  type CollectibleOf,
+  collectibleKinds,
+  collectibleTables,
   computeInsights,
   defaultSettings,
   type EntityTable,
@@ -10,7 +14,7 @@ import {
   type Venue,
 } from '@mnemo/core';
 import type { ProviderContext } from '@mnemo/providers';
-import { useQuery } from '@tanstack/react-query';
+import { type UseQueryResult, useQueries, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useObjectUrl } from '../lib/hooks';
@@ -40,6 +44,36 @@ export const useArtwork = (id: string) =>
 export const useBooks = () => useLocal('books', [], (s) => s.books.list().then(byNewest)).data;
 export const useBook = (id: string) =>
   useLocal('books', [id], (s) => s.books.get(id).then((b) => b ?? null));
+export type CollectiblesByKind = { [K in CollectibleKind]: CollectibleOf<K>[] };
+
+function combineCollectibles(results: UseQueryResult<unknown[]>[]): CollectiblesByKind | undefined {
+  if (results.some((r) => !r.data)) return undefined;
+  return Object.fromEntries(
+    collectibleKinds.map((kind, i) => [kind, results[i]!.data]),
+  ) as CollectiblesByKind;
+}
+
+/**
+ * Every collectible by kind, newest first, for views that span kinds (people, lists). Shares
+ * its cache with `useArtworks`, `useBooks`, ….
+ */
+export function useCollectibles(): CollectiblesByKind | undefined {
+  const store = useStore();
+  return useQueries({
+    queries: collectibleKinds.map((kind) => {
+      const table = collectibleTables[kind];
+      return {
+        queryKey: ['local', table],
+        queryFn: () =>
+          (store[table].list() as Promise<Array<{ createdAt: string }>>).then(byNewest),
+        staleTime: Number.POSITIVE_INFINITY,
+        networkMode: 'always' as const,
+      };
+    }),
+    combine: combineCollectibles,
+  });
+}
+
 export const usePlaces = () =>
   useLocal('places', [], (s) =>
     s.places.list().then((p) => p.sort((a, b) => a.name.localeCompare(b.name))),

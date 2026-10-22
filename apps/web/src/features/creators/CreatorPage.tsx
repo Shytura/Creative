@@ -1,14 +1,15 @@
-import { removeCreator } from '@mnemo/core';
+import { type CollectibleKind, collectibleKinds, removeCreator } from '@mnemo/core';
 import { Button, EmptyState, SectionTitle } from '@mnemo/ui';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { ArrowUpRightIcon, LinkIcon, PencilIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useArtworks, useCreators } from '../../app/data';
+import { type AnyCollectible, resolveItems } from '../../app/collectibles';
+import { useCollectibles, useCreators } from '../../app/data';
 import { useDialogs } from '../../app/dialogs';
 import { useStore } from '../../app/store';
-import { ArtworkCard } from '../../components/ArtworkCard';
 import { Confirm } from '../../components/bits';
+import { CollectibleCard } from '../../components/CollectibleCard';
 import { RemoteImage } from '../../components/MediaImage';
 import { WikiSummary } from '../../components/WikiSummary';
 import { useFormat } from '../../lib/format';
@@ -23,20 +24,30 @@ export function CreatorPage() {
   const dialogs = useDialogs();
   const format = useFormat();
   const creators = useCreators();
-  const artworks = useArtworks();
+  const collectibles = useCollectibles();
 
   if (!creators) return null;
   const creator = creators.find((c) => c.id === creatorId);
   if (!creator) return <EmptyState title={t('creator.notFound')} />;
 
-  const works = (artworks ?? []).filter((a) => a.creatorIds.includes(creatorId));
+  // Their works of every kind, one section per kind.
+  const sections = collectibleKinds.flatMap((kind) => {
+    const refs = (collectibles?.[kind] ?? [])
+      .filter((item) => item.creatorIds.includes(creatorId))
+      .map((item) => ({ kind, id: item.id }));
+    return refs.length > 0 && collectibles
+      ? [{ kind, works: resolveItems(refs, collectibles) }]
+      : [];
+  });
+  // "Author" for someone known only from books, "Person" for someone known from several kinds.
+  const role = sections.length === 1 ? t(`kinds.${sections[0]!.kind}.role`) : t('creator.eyebrow');
   const life = format.lifespan(creator);
 
   return (
     <article>
       <header className="grid animate-rise gap-10 border-b border-line pb-10 md:grid-cols-[minmax(0,1fr)_auto]">
         <div className="min-w-0">
-          <p className="eyebrow mb-4 text-accent">{t('creator.eyebrow')}</p>
+          <p className="eyebrow mb-4 text-accent">{role}</p>
           <h1 className="display text-[clamp(2.75rem,7vw,5.5rem)] font-[360]">{creator.name}</h1>
           {life && <p className="caption mt-4 text-2xl text-ink-2">{life}</p>}
           {creator.description && (
@@ -98,18 +109,14 @@ export function CreatorPage() {
       </header>
 
       <div className="mt-14 grid gap-14 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
-        <section>
-          <SectionTitle>{t('creator.works', { count: works.length })}</SectionTitle>
-          {works.length === 0 ? (
+        <div className="space-y-16">
+          {sections.map(({ kind, works }) => (
+            <WorksSection key={kind} kind={kind} works={works} />
+          ))}
+          {collectibles && sections.length === 0 && (
             <p className="caption text-lg text-ink-3">{t('creator.noWorks')}</p>
-          ) : (
-            <div className="masonry columns-2 gap-6 md:columns-3">
-              {works.map((a) => (
-                <ArtworkCard key={a.id} artwork={a} className="mb-8" />
-              ))}
-            </div>
           )}
-        </section>
+        </div>
         {creator.wikipedia && (
           <div>
             <WikiSummary tag={creator.wikipedia} showImage={!creator.imageUrl} />
@@ -117,5 +124,19 @@ export function CreatorPage() {
         )}
       </div>
     </article>
+  );
+}
+
+function WorksSection({ kind, works }: { kind: CollectibleKind; works: AnyCollectible[] }) {
+  const { t } = useTranslation();
+  return (
+    <section>
+      <SectionTitle>{t(`kinds.${kind}.inArchive`, { count: works.length })}</SectionTitle>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3">
+        {works.map((entry) => (
+          <CollectibleCard key={entry.item.id} entry={entry} />
+        ))}
+      </div>
+    </section>
   );
 }
