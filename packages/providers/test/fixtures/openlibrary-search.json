@@ -1,0 +1,114 @@
+{
+  "numFound": 194,
+  "docs": [
+    {
+      "author_key": [
+        "OL22973A"
+      ],
+      "author_name": [
+        "Thomas Mann"
+      ],
+      "cover_i": 2056242,
+      "first_publish_year": 1924,
+      "key": "/works/OL14866824W",
+      "number_of_pages_median": 729,
+      "title": "Der Zauberberg",
+      "editions": {
+        "numFound": 116,
+        "start": 0,
+        "numFoundExact": true,
+        "docs": [
+          {
+            "key": "/books/OL24949364M",
+            "title": "Der Zauberberg",
+            "cover_i": 6953661,
+            "language": [
+              "ger"
+            ],
+            "publisher": [
+              "Fischer"
+            ],
+            "publish_date": [
+              "1967"
+            ],
+            "isbn": [
+              "9783436007911",
+              "3436007919"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "author_key": [
+        "OL22973A"
+      ],
+      "author_name": [
+        "Thomas Mann"
+      ],
+      "first_publish_year": 1964,
+      "key": "/works/OL38775217W",
+      "number_of_pages_median": 763,
+      "title": "Der Zauberberg",
+      "editions": {
+        "numFound": 2,
+        "start": 0,
+        "numFoundExact": true,
+        "docs": [
+          {
+            "key": "/books/OL52791557M",
+            "title": "Der Zauberberg",
+            "subtitle": "Roman",
+            "language": [
+              "ger"
+            ],
+            "publisher": [
+              "Fischer"
+            ],
+            "publish_date": [
+              "1964"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "author_key": [
+        "OL22973A"
+      ],
+      "author_name": [
+        "Thomas Mann"
+      ],
+      "cover_i": 7081887,
+      "first_publish_year": 1993,
+      "key": "/works/OL14866866W",
+      "number_of_pages_median": 207,
+      "title": "Selbstkommentare: Der Zauberberg",
+      "editions": {
+        "numFound": 1,
+        "start": 0,
+        "numFoundExact": true,
+        "docs": [
+          {
+            "key": "/books/OL15280119M",
+            "title": "Selbstkommentare: Der Zauberberg",
+            "cover_i": 7081887,
+            "language": [
+              "ger"
+            ],
+            "publisher": [
+              "Fischer Taschenbuch"
+            ],
+            "publish_date": [
+              "1993"
+            ],
+            "isbn": [
+              "3596268958",
+              "9783596268955"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

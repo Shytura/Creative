@@ -1,0 +1,34 @@
+{
+  "ISBN:9783596294312": {
+    "url": "http://openlibrary.org/books/OL18348219M/Buddenbrooks",
+    "key": "/books/OL18348219M",
+    "title": "Buddenbrooks",
+    "subtitle": "Verfall einer Familie : Roman",
+    "authors": [
+      {
+        "url": "http://openlibrary.org/authors/OL22973A/Thomas_Mann",
+        "name": "Thomas Mann"
+      }
+    ],
+    "number_of_pages": 758,
+    "identifiers": {
+      "isbn_10": [
+        "3596294312"
+      ],
+      "openlibrary": [
+        "OL18348219M"
+      ]
+    },
+    "publishers": [
+      {
+        "name": "Fischer Taschenbuch"
+      }
+    ],
+    "publish_date": "1989",
+    "cover": {
+      "small": "https://covers.openlibrary.org/b/id/8766431-S.jpg",
+      "medium": "https://covers.openlibrary.org/b/id/8766431-M.jpg",
+      "large": "https://covers.openlibrary.org/b/id/8766431-L.jpg"
+    }
+  }
+}

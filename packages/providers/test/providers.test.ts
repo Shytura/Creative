@@ -2,20 +2,31 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   aicProvider,
   availableArtProviders,
+  availableBookProviders,
+  buildDnbQuery,
   buildOverpassQuery,
   buildWikidataQuery,
   commonsFileName,
+  dnbProvider,
   fetchJson,
+  googleBooksProvider,
+  lookupIsbn,
   mapAic,
   mapCleveland,
+  mapDnb,
   mapEuropeana,
+  mapGoogleBooks,
   mapMetObject,
+  mapOpenLibraryBook,
+  mapOpenLibrarySearch,
   mapOverpass,
   mapPhotonFeature,
   mapSummary,
   mapWikidata,
   mapWikidataPerson,
+  mergeBookResults,
   metProvider,
+  openLibraryProvider,
   overpassProvider,
   ProviderError,
   photonProvider,
@@ -29,8 +40,13 @@ import {
 } from '../src';
 import aicSearch from './fixtures/aic-search.json';
 import cmaSearch from './fixtures/cma-search.json';
+import dnbIsbn from './fixtures/dnb-isbn.xml?raw';
+import dnbSearch from './fixtures/dnb-search.xml?raw';
+import googleBooksSearch from './fixtures/googlebooks-search.json';
 import metObject from './fixtures/met-object.json';
 import metSearch from './fixtures/met-search.json';
+import openLibraryIsbn from './fixtures/openlibrary-isbn.json';
+import openLibrarySearch from './fixtures/openlibrary-search.json';
 import overpass from './fixtures/overpass.json';
 import photonCities from './fixtures/photon-cities.json';
 import wikidataPeopleEntities from './fixtures/wikidata-people-entities.json';
@@ -40,6 +56,8 @@ import wikipediaDisambiguation from './fixtures/wikipedia-summary.json';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+const xml = (body: string) =>
+  new Response(body, { headers: { 'content-type': 'text/xml;charset=UTF-8' } });
 
 describe('art provider mapping', () => {
   it('maps the Art Institute of Chicago with IIIF urls', () => {
@@ -109,7 +127,11 @@ describe('art provider mapping', () => {
   it('only offers keyed providers when a key is set', () => {
     expect(availableArtProviders().map((p) => p.id)).not.toContain('europeana');
     expect(availableArtProviders({ europeana: 'k' }).map((p) => p.id)).toContain('europeana');
-    expect(providersNeedingKeys().map((p) => p.requiresKey.id)).toEqual(['europeana', 'harvard']);
+    expect(providersNeedingKeys().map((p) => p.requiresKey.id)).toEqual([
+      'europeana',
+      'harvard',
+      'googlebooks',
+    ]);
   });
 });
 
@@ -340,5 +362,160 @@ describe('people', () => {
     });
     expect(String(fetch.mock.calls[0]?.[0])).toContain('origin=*');
     expect(results.map((r) => r.wikidataId)).toEqual(['Q41264', 'Q944834', 'Q3159680']);
+  });
+});
+
+describe('book catalogues', () => {
+  it('maps Open Library works with their best matching edition', () => {
+    const [zauberberg, second] = mapOpenLibrarySearch(openLibrarySearch);
+    expect(zauberberg).toEqual({
+      provider: 'openlibrary',
+      externalId: 'OL24949364M',
+      title: 'Der Zauberberg',
+      authors: ['Thomas Mann'],
+      isbn: '9783436007911',
+      publisher: 'Fischer',
+      year: '1967',
+      pageCount: 729,
+      language: 'de',
+      coverUrl: 'https://covers.openlibrary.org/b/id/6953661-L.jpg',
+      url: 'https://openlibrary.org/books/OL24949364M',
+    });
+    // An edition without ISBN or cover still yields a usable result.
+    expect(second).toMatchObject({ subtitle: 'Roman', year: '1964' });
+    expect(second?.isbn).toBeUndefined();
+  });
+
+  it('maps an Open Library edition looked up by ISBN', () => {
+    const book = openLibraryIsbn['ISBN:9783596294312'];
+    expect(mapOpenLibraryBook('9783596294312', book)).toMatchObject({
+      externalId: 'OL18348219M',
+      title: 'Buddenbrooks',
+      subtitle: 'Verfall einer Familie : Roman',
+      authors: ['Thomas Mann'],
+      publisher: 'Fischer Taschenbuch',
+      year: '1989',
+      pageCount: 758,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8766431-L.jpg',
+    });
+  });
+
+  it('reads Dublin Core records of the Deutsche Nationalbibliothek', () => {
+    const [current, older] = mapDnb(dnbIsbn);
+    expect(current).toEqual({
+      provider: 'dnb',
+      externalId: '1362379786',
+      title: 'Buddenbrooks',
+      subtitle: 'Verfall einer Familie : Roman',
+      authors: ['Thomas Mann'],
+      isbn: '9783596294312',
+      publisher: 'Fischer Taschenbuch',
+      year: '2025',
+      pageCount: 843,
+      language: 'de',
+      coverUrl: 'https://portal.dnb.de/opac/mvb/cover?isbn=9783596294312',
+      url: 'https://d-nb.info/1362379786',
+    });
+    expect(older).toMatchObject({ year: '1994', pageCount: 758, isbn: '9783596294312' });
+
+    // Translators and authors of afterwords are not authors; foreign records keep their language.
+    const results = mapDnb(dnbSearch);
+    expect(results.map((r) => r.authors)).toEqual([
+      ['Thomas Mann'],
+      ['Claudio Steiger'],
+      ['Thomas Mann'],
+      ['Thomas Mann'],
+    ]);
+    expect(results[2]).toMatchObject({
+      title: 'A montanha mágica',
+      language: 'pt',
+      pageCount: 926,
+    });
+    expect(results[1]?.title).toBe('„Fieberhafte Hermetik“');
+  });
+
+  it('builds DNB queries that only match printed books', () => {
+    expect(buildDnbQuery(' der  "zauberberg" ')).toBe('WOE=der and WOE=zauberberg and mat=books');
+  });
+
+  it('maps Google Books volumes with https covers', () => {
+    // Built from the documented volume format: anonymous requests no longer get any quota.
+    const [book, ...rest] = mapGoogleBooks(googleBooksSearch);
+    expect(rest).toEqual([]);
+    expect(book).toMatchObject({
+      externalId: 'zR9bDwAAQBAJ',
+      isbn: '9783596294312',
+      year: '2012',
+      language: 'de',
+      description: expect.stringContaining('Lübecker'),
+    });
+    expect(book?.coverUrl).toBe(
+      'https://books.google.com/books/content?id=zR9bDwAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
+    );
+  });
+
+  it('offers Google Books only with a key', async () => {
+    expect(availableBookProviders().map((p) => p.id)).toEqual(['openlibrary', 'dnb']);
+    expect(availableBookProviders({ googlebooks: 'k' }).map((p) => p.id)).toContain('googlebooks');
+    expect(providersNeedingKeys().map((p) => p.requiresKey.id)).toContain('googlebooks');
+    await expect(googleBooksProvider.search('x', { locale: 'de' })).rejects.toThrow(ProviderError);
+  });
+
+  it('merges catalogues field by field and prefers storable covers', () => {
+    const dnb = mapDnb(dnbIsbn)[0]!;
+    const ol = mapOpenLibraryBook('9783596294312', openLibraryIsbn['ISBN:9783596294312']);
+    const merged = mergeBookResults([
+      { result: dnb, storableCover: false },
+      { result: { ...ol, description: 'Roman' }, storableCover: true },
+    ]);
+    expect(merged).toMatchObject({
+      provider: 'dnb',
+      year: '2025',
+      language: 'de',
+      description: 'Roman',
+      coverUrl: 'https://covers.openlibrary.org/b/id/8766431-L.jpg',
+    });
+    expect(mergeBookResults([])).toBeUndefined();
+  });
+
+  it('looks an ISBN up in all catalogues, led by the DNB for German', async () => {
+    const fetch = vi.fn(async (url: string | URL | Request) =>
+      String(url).includes('dnb.de') ? xml(dnbIsbn) : json(openLibraryIsbn),
+    );
+    const book = await lookupIsbn('9783596294312', { locale: 'de', fetch: fetch as never });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(book).toMatchObject({ provider: 'dnb', pageCount: 843, language: 'de' });
+    expect(book?.coverUrl).toContain('covers.openlibrary.org');
+
+    const english = await lookupIsbn('9783596294312', { locale: 'en', fetch: fetch as never });
+    expect(english).toMatchObject({ provider: 'openlibrary', pageCount: 758, language: 'de' });
+  });
+
+  it('returns nothing for unknown ISBNs and fails only when every catalogue fails', async () => {
+    const empty = vi.fn(async (url: string | URL | Request) =>
+      String(url).includes('dnb.de')
+        ? xml('<searchRetrieveResponse><records></records></searchRetrieveResponse>')
+        : json({}),
+    );
+    expect(await lookupIsbn('9780000000002', { locale: 'de', fetch: empty as never })).toBe(
+      undefined,
+    );
+    const down = vi.fn(async () => json({}, 503));
+    await expect(
+      lookupIsbn('9780000000002', { locale: 'de', fetch: down as never }),
+    ).rejects.toThrow(ProviderError);
+  });
+
+  it('sends the search to each catalogue', async () => {
+    const fetch = vi.fn(async (url: string | URL | Request) =>
+      String(url).includes('dnb.de') ? xml(dnbSearch) : json(openLibrarySearch),
+    );
+    const ctx = { locale: 'de' as const, fetch: fetch as never };
+    expect(await openLibraryProvider.search('zauberberg', ctx)).toHaveLength(3);
+    expect(String(fetch.mock.calls[0]?.[0])).toContain('lang=de');
+    expect(await dnbProvider.search('zauberberg mann', ctx)).toHaveLength(4);
+    expect(new URL(String(fetch.mock.calls[1]?.[0])).searchParams.get('query')).toBe(
+      'WOE=zauberberg and WOE=mann and mat=books',
+    );
   });
 });

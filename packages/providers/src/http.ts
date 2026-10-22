@@ -39,12 +39,12 @@ export interface RequestOptions {
   minIntervalMs?: number;
 }
 
-export async function fetchJson<T>(
+async function request(
   provider: string,
   url: string,
   ctx: ProviderContext,
-  { init, timeoutMs = 20_000, minIntervalMs = 0 }: RequestOptions = {},
-): Promise<T> {
+  { init, timeoutMs = 20_000, minIntervalMs = 0 }: RequestOptions,
+): Promise<Response> {
   const doFetch = ctx.fetch ?? globalThis.fetch;
   if (minIntervalMs > 0) await throttle(new URL(url).host, minIntervalMs, ctx.signal);
 
@@ -57,11 +57,31 @@ export async function fetchJson<T>(
     throw new ProviderError(provider, `network error: ${(error as Error).message}`);
   }
   if (!response.ok) throw new ProviderError(provider, `HTTP ${response.status}`, response.status);
+  return response;
+}
+
+export async function fetchJson<T>(
+  provider: string,
+  url: string,
+  ctx: ProviderContext,
+  options: RequestOptions = {},
+): Promise<T> {
+  const response = await request(provider, url, ctx, options);
   try {
     return (await response.json()) as T;
   } catch {
     throw new ProviderError(provider, 'invalid JSON response');
   }
+}
+
+/** For APIs that answer in XML or other text formats. */
+export async function fetchText(
+  provider: string,
+  url: string,
+  ctx: ProviderContext,
+  options: RequestOptions = {},
+): Promise<string> {
+  return (await request(provider, url, ctx, options)).text();
 }
 
 export function query(params: Record<string, string | number | boolean | undefined>): string {

@@ -49,6 +49,39 @@ export interface ArtworkSearchProvider {
   search(query: string, ctx: ProviderContext): Promise<ArtworkSearchResult[]>;
 }
 
+// ── Books ──────────────────────────────────────────────────────────────────
+
+export interface BookSearchResult {
+  provider: string;
+  externalId: string;
+  title: string;
+  subtitle?: string;
+  /** Display names, e.g. `Thomas Mann`. */
+  authors: string[];
+  /** ISBN-13 without hyphens. */
+  isbn?: string;
+  publisher?: string;
+  year?: string;
+  pageCount?: number;
+  /** ISO 639-1, e.g. `de`. */
+  language?: string;
+  description?: string;
+  coverUrl?: string;
+  url?: string;
+}
+
+export interface BookSearchProvider {
+  id: string;
+  name: string;
+  homepage: string;
+  requiresKey?: ProviderKeySpec;
+  /** False when covers can be shown but not stored offline (no CORS on the image host). */
+  storableCovers?: boolean;
+  search(query: string, ctx: ProviderContext): Promise<BookSearchResult[]>;
+  /** The edition with this ISBN-13, if the catalogue knows it. */
+  byIsbn(isbn: string, ctx: ProviderContext): Promise<BookSearchResult | undefined>;
+}
+
 // ── Places & points of interest ────────────────────────────────────────────
 
 export interface PlaceResult {
