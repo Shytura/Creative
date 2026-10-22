@@ -2,9 +2,15 @@ import type { Coords, VenueKind } from '@mnemo/core';
 
 export type ProviderLocale = 'de' | 'en';
 
-export interface ProviderKeys {
-  europeana?: string | undefined;
-  harvard?: string | undefined;
+/** API keys entered by the user, keyed by `ProviderKeySpec.id`. */
+export type ProviderKeys = Record<string, string | undefined>;
+
+/** Declares that a provider only works with a free API key from the user. */
+export interface ProviderKeySpec {
+  /** Storage key in `ProviderKeys`; usually the provider id. */
+  id: string;
+  /** Where users can request a key. */
+  signupUrl: string;
 }
 
 export interface ProviderContext {
@@ -39,7 +45,7 @@ export interface ArtworkSearchProvider {
   name: string;
   homepage: string;
   /** Present when the provider only works with an API key from the settings. */
-  requiresKey?: keyof ProviderKeys;
+  requiresKey?: ProviderKeySpec;
   search(query: string, ctx: ProviderContext): Promise<ArtworkSearchResult[]>;
 }
 

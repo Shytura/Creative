@@ -42,7 +42,7 @@ export const europeanaProvider: ArtworkSearchProvider = {
   id: 'europeana',
   name: 'Europeana',
   homepage: 'https://pro.europeana.eu/page/get-api',
-  requiresKey: 'europeana',
+  requiresKey: { id: 'europeana', signupUrl: 'https://pro.europeana.eu/page/get-api' },
   async search(q, ctx) {
     const key = ctx.keys?.europeana;
     if (!key) throw new ProviderError('europeana', 'API key missing');
@@ -94,7 +94,7 @@ export const harvardProvider: ArtworkSearchProvider = {
   id: 'harvard',
   name: 'Harvard Art Museums',
   homepage: 'https://harvardartmuseums.org/collections/api',
-  requiresKey: 'harvard',
+  requiresKey: { id: 'harvard', signupUrl: 'https://harvardartmuseums.org/collections/api' },
   async search(q, ctx) {
     const key = ctx.keys?.harvard;
     if (!key) throw new ProviderError('harvard', 'API key missing');

@@ -18,6 +18,7 @@ import {
   overpassProvider,
   ProviderError,
   photonProvider,
+  providersNeedingKeys,
   resolveCommonsImage,
   venueKindFromTags,
   wikidataProvider,
@@ -103,6 +104,7 @@ describe('art provider mapping', () => {
   it('only offers keyed providers when a key is set', () => {
     expect(availableArtProviders().map((p) => p.id)).not.toContain('europeana');
     expect(availableArtProviders({ europeana: 'k' }).map((p) => p.id)).toContain('europeana');
+    expect(providersNeedingKeys().map((p) => p.requiresKey.id)).toEqual(['europeana', 'harvard']);
   });
 });
 

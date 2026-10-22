@@ -31,12 +31,8 @@ export const settingsSchema = z.object({
   background: backgroundSchema.default({ kind: 'paper' }),
   /** 0 = subtle, 1 = vivid. Applies to image backgrounds. */
   backgroundIntensity: z.number().min(0).max(1).default(0.35),
-  providerKeys: z
-    .object({
-      europeana: z.string().optional(),
-      harvard: z.string().optional(),
-    })
-    .default({}),
+  /** API keys for data sources, keyed by the provider's key id (e.g. `europeana`). */
+  providerKeys: z.record(z.string(), z.string()).default({}),
   /** Last app version whose release notes the user has seen; drives "What's new". */
   lastSeenVersion: z.string().optional(),
 });

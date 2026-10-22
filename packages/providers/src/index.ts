@@ -3,7 +3,7 @@ import { clevelandProvider } from './art/cleveland';
 import { europeanaProvider, harvardProvider } from './art/keyed';
 import { metProvider } from './art/met';
 import { wikidataProvider } from './art/wikidata';
-import type { ArtworkSearchProvider, ProviderKeys } from './types';
+import type { ArtworkSearchProvider, ProviderKeySpec, ProviderKeys } from './types';
 
 export { aicProvider, mapAic } from './art/aic';
 export { clevelandProvider, mapCleveland } from './art/cleveland';
@@ -37,5 +37,15 @@ export const artProviders: readonly ArtworkSearchProvider[] = [
 ];
 
 export function availableArtProviders(keys: ProviderKeys = {}): ArtworkSearchProvider[] {
-  return artProviders.filter((p) => !p.requiresKey || Boolean(keys[p.requiresKey]));
+  return artProviders.filter((p) => !p.requiresKey || Boolean(keys[p.requiresKey.id]));
+}
+
+/** Providers of every kind that need a key from the user; the settings list one field each. */
+export function providersNeedingKeys(): Array<{
+  name: string;
+  requiresKey: ProviderKeySpec;
+}> {
+  return artProviders.flatMap((p) =>
+    p.requiresKey ? [{ name: p.name, requiresKey: p.requiresKey }] : [],
+  );
 }

@@ -515,7 +515,7 @@ export const de = {
     language: 'Sprache',
     sources: 'Datenquellen',
     sourcesText:
-      'Die meisten Quellen funktionieren ohne Anmeldung. Für Europeana und Harvard brauchst du einen kostenlosen API-Schlüssel.',
+      'Die meisten Quellen funktionieren ohne Anmeldung. Für einige brauchst du einen kostenlosen API-Schlüssel.',
     getKey: 'Kostenlosen Schlüssel holen',
     keyPlaceholder: 'API-Schlüssel',
     data: 'Daten',

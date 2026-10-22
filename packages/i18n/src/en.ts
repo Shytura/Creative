@@ -511,7 +511,7 @@ export const en: Translation<typeof de> = {
     intensity: 'Intensity',
     language: 'Language',
     sources: 'Data sources',
-    sourcesText: 'Most sources work without an account. Europeana and Harvard need a free API key.',
+    sourcesText: 'Most sources work without an account. Some need a free API key.',
     getKey: 'Get a free key',
     keyPlaceholder: 'API key',
     data: 'Data',

@@ -1,4 +1,5 @@
 import { type Background, meshPresets, type SettingsPatch } from '@mnemo/core';
+import { providersNeedingKeys } from '@mnemo/providers';
 import {
   accentPresets,
   Button,
@@ -129,20 +130,18 @@ export function SettingsPage() {
 
         <Section title={t('settings.sources')} text={t('settings.sourcesText')}>
           <div className="grid gap-5 sm:grid-cols-2">
-            <ApiKeyField
-              label="Europeana"
-              href="https://pro.europeana.eu/page/get-api"
-              value={settings.providerKeys.europeana}
-              onSave={(europeana) =>
-                update({ providerKeys: { ...settings.providerKeys, europeana } })
-              }
-            />
-            <ApiKeyField
-              label="Harvard Art Museums"
-              href="https://harvardartmuseums.org/collections/api"
-              value={settings.providerKeys.harvard}
-              onSave={(harvard) => update({ providerKeys: { ...settings.providerKeys, harvard } })}
-            />
+            {providersNeedingKeys().map(({ name, requiresKey }) => (
+              <ApiKeyField
+                key={requiresKey.id}
+                label={name}
+                href={requiresKey.signupUrl}
+                value={settings.providerKeys[requiresKey.id]}
+                onSave={(value) => {
+                  const { [requiresKey.id]: _previous, ...rest } = settings.providerKeys;
+                  update({ providerKeys: value ? { ...rest, [requiresKey.id]: value } : rest });
+                }}
+              />
+            ))}
           </div>
         </Section>
 
