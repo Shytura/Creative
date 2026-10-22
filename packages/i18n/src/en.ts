@@ -58,6 +58,25 @@ export const en: Translation<typeof de> = {
     text: 'Perhaps it was rehung or moved to storage.',
     back: 'Back to the salon',
   },
+  error: {
+    eyebrow: 'A crack in the varnish',
+    title: 'Something went wrong here.',
+    text: 'Your data is not affected. Reload the page, or back up your archive just to be safe.',
+    reload: 'Reload',
+    home: 'To the salon',
+    backup: 'Download backup',
+    details: 'Technical details',
+  },
+  whatsNew: {
+    eyebrow: 'New in Mnemo',
+    title: 'Version {{version}}',
+    kinds: {
+      new: 'New',
+      improved: 'Improved',
+      fixed: 'Fixed',
+    },
+    done: 'Continue',
+  },
   map: {
     unavailable: 'Map unavailable offline',
   },
@@ -522,5 +541,7 @@ export const en: Translation<typeof de> = {
     integration: 'Embed',
     integrationText:
       'Show a collection on your website: export it as JSON above and include the widget.',
+    about: 'About Mnemo',
+    aboutText: 'Version {{version}} · What has changed from edition to edition.',
   },
 };

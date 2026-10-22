@@ -21,11 +21,15 @@ async function throttle(host: string, minIntervalMs: number, signal?: AbortSigna
   const wait = next - now;
   if (wait <= 0) return;
   await new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(resolve, wait);
-    signal?.addEventListener('abort', () => {
+    const onAbort = () => {
       clearTimeout(timer);
-      reject(signal.reason);
-    });
+      reject(signal?.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, wait);
+    signal?.addEventListener('abort', onAbort, { once: true });
   });
 }
 

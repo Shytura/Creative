@@ -12,6 +12,15 @@ import { blobToDataUrl, dataUrlToBlob } from './media';
 
 const MANIFEST = 'mnemo.json';
 
+const EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/avif': 'avif',
+  'image/gif': 'gif',
+};
+const MIME_TYPES = Object.fromEntries(Object.entries(EXTENSIONS).map(([m, e]) => [e, m]));
+
 function download(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -34,12 +43,12 @@ export async function exportBackup(store: MnemoStore): Promise<void> {
     const full = await store.media.getBlob(media.id, 'full');
     const thumb = await store.media.getBlob(media.id, 'thumb');
     if (full)
-      files[`media/${media.id}.full.jpg`] = [
+      files[`media/${media.id}.full.${EXTENSIONS[full.type] ?? 'jpg'}`] = [
         new Uint8Array(await full.arrayBuffer()),
         { level: 0 },
       ];
     if (thumb && thumb !== full)
-      files[`media/${media.id}.thumb.jpg`] = [
+      files[`media/${media.id}.thumb.${EXTENSIONS[thumb.type] ?? 'jpg'}`] = [
         new Uint8Array(await thumb.arrayBuffer()),
         { level: 0 },
       ];
@@ -97,10 +106,12 @@ export async function importArchive(
     if (!manifest) throw new Error(`${MANIFEST} missing in archive`);
     archive = parseArchive(JSON.parse(new TextDecoder().decode(manifest)));
     for (const [path, data] of Object.entries(entries)) {
-      const match = path.match(/^media\/(.+)\.(full|thumb)\.jpg$/);
-      if (!match?.[1] || !match[2]) continue;
+      const match = path.match(/^media\/(.+)\.(full|thumb)\.(\w+)$/);
+      if (!match?.[1] || !match[2] || !match[3]) continue;
       const entry = blobs.get(match[1]) ?? {};
-      entry[match[2] as 'full' | 'thumb'] = new Blob([data as BlobPart], { type: 'image/jpeg' });
+      entry[match[2] as 'full' | 'thumb'] = new Blob([data as BlobPart], {
+        type: MIME_TYPES[match[3].toLowerCase()] ?? 'image/jpeg',
+      });
       blobs.set(match[1], entry);
     }
   } else {

@@ -37,6 +37,8 @@ export const settingsSchema = z.object({
       harvard: z.string().optional(),
     })
     .default({}),
+  /** Last app version whose release notes the user has seen; drives "What's new". */
+  lastSeenVersion: z.string().optional(),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 export type SettingsPatch = Partial<z.input<typeof settingsSchema>>;

@@ -10,6 +10,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { SalonPage } from '../features/home/SalonPage';
 import { AppShell } from './shell/AppShell';
+import { ErrorPage } from './shell/ErrorPage';
 
 export interface CollectionSearch {
   q?: string;
@@ -52,7 +53,11 @@ function validateCollectionSearch(search: Record<string, unknown>): CollectionSe
   return Object.fromEntries(Object.entries(result).filter(([, v]) => v !== undefined));
 }
 
-const rootRoute = createRootRoute({ component: AppShell, notFoundComponent: NotFound });
+const rootRoute = createRootRoute({
+  component: AppShell,
+  notFoundComponent: NotFound,
+  errorComponent: ErrorPage,
+});
 
 const route = <P extends string>(
   path: P,
@@ -137,6 +142,7 @@ export const router = createRouter({
   defaultPreload: 'intent',
   scrollRestoration: true,
   defaultViewTransition: true,
+  defaultErrorComponent: ErrorPage,
 });
 
 declare module '@tanstack/react-router' {

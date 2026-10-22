@@ -139,3 +139,41 @@ test('backup export and import round-trip', async ({ page }, testInfo) => {
   await page.getByText('Gesichertes Werk').click();
   await expect(page.getByText('Farbpalette')).toBeVisible();
 });
+
+test('shows what is new once after an update', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Mit Beispielen starten' })).toBeVisible();
+  await expect(page.getByText('Neu in Mnemo')).toBeHidden();
+
+  // Pretend the user last saw version 0.1.0.
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open('mnemo');
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const tx = open.result.transaction('settings', 'readwrite');
+          tx.objectStore('settings').put({ id: 'settings', lastSeenVersion: '0.1.0' });
+          tx.oncomplete = () => {
+            open.result.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+  );
+  await page.reload();
+
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('Neu in Mnemo')).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: /^Version \d+\.\d+\.\d+$/ })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Weiter' }).click();
+  await expect(dialog).toBeHidden();
+
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Mit Beispielen starten' })).toBeVisible();
+  await expect(page.getByRole('dialog')).toBeHidden();
+
+  await page.goto('/settings');
+  await expect(page.getByRole('heading', { name: 'Über Mnemo' })).toBeVisible();
+});

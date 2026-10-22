@@ -27,6 +27,7 @@ import {
 import { type ComponentType, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { WhatsNewOnUpdate } from '../../features/whats-new/WhatsNew';
 import { useDialogs } from '../dialogs';
 import { Background } from './Appearance';
 import { DialogHost } from './DialogHost';
@@ -50,6 +51,7 @@ export function AppShell() {
       <Background />
       <Layout />
       <UpdatePrompt />
+      <WhatsNewOnUpdate />
     </DialogHost>
   );
 }

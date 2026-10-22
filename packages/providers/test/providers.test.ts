@@ -5,6 +5,7 @@ import {
   buildOverpassQuery,
   buildWikidataQuery,
   commonsFileName,
+  fetchJson,
   mapAic,
   mapCleveland,
   mapEuropeana,
@@ -124,6 +125,22 @@ describe('art provider requests', () => {
     });
     const results = await metProvider.search('sunflowers', { locale: 'en', fetch: fetch as never });
     expect(results.map((r) => r.externalId)).toEqual(['436524']);
+  });
+
+  it('cancels a throttled request when aborted', async () => {
+    const fetch = vi.fn(async () => json({ ok: true }));
+    const url = 'https://throttle.test/x';
+    await fetchJson('t', url, { locale: 'de', fetch: fetch as never }, { minIntervalMs: 60_000 });
+    const controller = new AbortController();
+    const pending = fetchJson(
+      't',
+      url,
+      { locale: 'de', fetch: fetch as never, signal: controller.signal },
+      { minIntervalMs: 60_000 },
+    );
+    controller.abort(new Error('stop'));
+    await expect(pending).rejects.toThrow('stop');
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it('wraps HTTP errors', async () => {

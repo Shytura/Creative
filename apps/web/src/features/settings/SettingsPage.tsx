@@ -31,11 +31,14 @@ import { toast } from 'sonner';
 import { useArtworks, useCollections, useSettings } from '../../app/data';
 import { useResolvedTheme } from '../../app/shell/Appearance';
 import { useStore } from '../../app/store';
+import { releases } from '../../changelog';
 import { Confirm } from '../../components/bits';
 import { MediaImage } from '../../components/MediaImage';
 import { clearAll, exportBackup, exportShareable, importArchive } from '../../lib/archive-io';
 import { useFormat } from '../../lib/format';
 import { processImage, saveProcessedImage } from '../../lib/media';
+import { APP_VERSION } from '../../version';
+import { ReleaseNotes } from '../whats-new/WhatsNew';
 
 export function SettingsPage() {
   const { t } = useTranslation();
@@ -158,6 +161,13 @@ export function SettingsPage() {
   columns="3">
 </mnemo-gallery>`}
           </pre>
+        </Section>
+
+        <Section
+          title={t('settings.about')}
+          text={t('settings.aboutText', { version: APP_VERSION })}
+        >
+          <ReleaseNotes releases={releases} />
         </Section>
       </div>
     </>

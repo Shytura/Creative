@@ -57,6 +57,25 @@ export const de = {
     text: 'Vielleicht wurde sie umgehängt oder ins Depot verlegt.',
     back: 'Zurück in den Salon',
   },
+  error: {
+    eyebrow: 'Ein Riss im Firnis',
+    title: 'Hier ist etwas schiefgelaufen.',
+    text: 'Deine Daten sind davon nicht betroffen. Lade die Seite neu oder sichere zur Vorsicht dein Archiv.',
+    reload: 'Neu laden',
+    home: 'Zum Salon',
+    backup: 'Sicherung herunterladen',
+    details: 'Technische Details',
+  },
+  whatsNew: {
+    eyebrow: 'Neu in Mnemo',
+    title: 'Version {{version}}',
+    kinds: {
+      new: 'Neu',
+      improved: 'Verbessert',
+      fixed: 'Behoben',
+    },
+    done: 'Weiter',
+  },
   map: {
     unavailable: 'Karte offline nicht verfügbar',
   },
@@ -527,5 +546,7 @@ export const de = {
     integration: 'Einbetten',
     integrationText:
       'Zeige eine Sammlung auf deiner Webseite: Exportiere sie oben als JSON und binde das Widget ein.',
+    about: 'Über Mnemo',
+    aboutText: 'Version {{version}} · Was sich von Ausgabe zu Ausgabe verändert hat.',
   },
 };
