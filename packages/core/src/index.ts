@@ -1,6 +1,7 @@
 export * from './archive';
 export * from './lib/color';
 export * from './lib/geo';
+export * from './lib/isbn';
 export * from './lib/misc';
 export * from './migrations';
 export * from './model/common';
@@ -12,4 +13,5 @@ export * from './services/collections';
 export * from './services/commands';
 export * from './services/creators';
 export * from './services/insights';
+export * from './services/library';
 export * from './services/queries';

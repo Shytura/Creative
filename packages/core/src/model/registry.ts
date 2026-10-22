@@ -2,6 +2,8 @@ import type { z } from 'zod';
 import {
   artworkDraftSchema,
   artworkSchema,
+  bookDraftSchema,
+  bookSchema,
   type CollectibleKind,
   collectionDraftSchema,
   collectionSchema,
@@ -36,6 +38,7 @@ export const entities = {
   venues: { schema: venueSchema, draftSchema: venueDraftSchema },
   visits: { schema: visitSchema, draftSchema: visitDraftSchema },
   artworks: { schema: artworkSchema, draftSchema: artworkDraftSchema },
+  books: { schema: bookSchema, draftSchema: bookDraftSchema },
   collections: { schema: collectionSchema, draftSchema: collectionDraftSchema },
   trips: { schema: tripSchema, draftSchema: tripDraftSchema },
   creators: { schema: creatorSchema, draftSchema: creatorDraftSchema },
@@ -51,4 +54,9 @@ export const entityNames = Object.keys(entities) as EntityName[];
 /** The table holding each collectible kind. */
 export const collectibleTables = {
   artwork: 'artworks',
+  book: 'books',
 } as const satisfies Record<CollectibleKind, EntityName>;
+
+export type CollectibleOf<K extends CollectibleKind> = EntityOf<(typeof collectibleTables)[K]>;
+/** Any stored collectible; services that only use the shared fields work with this. */
+export type Collectible = CollectibleOf<CollectibleKind>;

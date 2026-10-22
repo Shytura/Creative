@@ -1,7 +1,30 @@
-import type { CollectibleKind, Collection, ItemRef } from '../model/entities';
-import type { MnemoStore } from '../repositories';
+import type { z } from 'zod';
+import type { collectibleBaseSchema } from '../model/common';
+import {
+  type CollectibleKind,
+  type Collection,
+  collectibleKinds,
+  type ItemRef,
+} from '../model/entities';
+import { type Collectible, collectibleTables } from '../model/registry';
+import type { EntityRepository, MnemoStore } from '../repositories';
 
 /** Lists work across all collectible kinds; these helpers keep callers kind-agnostic. */
+
+export type CollectibleRepository = EntityRepository<
+  Collectible,
+  Partial<z.input<typeof collectibleBaseSchema>>
+>;
+
+/** The repository of every collectible kind, for services that only touch the shared fields. */
+export function collectibleRepositories(
+  store: MnemoStore,
+): Array<{ kind: CollectibleKind; repository: CollectibleRepository }> {
+  return collectibleKinds.map((kind) => ({
+    kind,
+    repository: store[collectibleTables[kind]] as unknown as CollectibleRepository,
+  }));
+}
 
 export const sameItem = (a: ItemRef, b: ItemRef) => a.kind === b.kind && a.id === b.id;
 

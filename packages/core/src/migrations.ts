@@ -83,6 +83,11 @@ export const migrations: readonly Migration[] = [
     },
     dataset: linkArtistsToCreators,
   },
+  {
+    to: 4,
+    description: 'Library: books as a second collectible kind',
+    tables: {},
+  },
 ];
 
 export class NewerSchemaError extends Error {

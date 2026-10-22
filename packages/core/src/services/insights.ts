@@ -1,12 +1,24 @@
 import { sortByHue } from '../lib/color';
-import type { Artwork, Creator, Place, Venue, Visit } from '../model/entities';
+import type { Artwork, Book, Creator, Place, Venue, Visit } from '../model/entities';
 
 export interface InsightsInput {
   places: readonly Place[];
   venues: readonly Venue[];
   visits: readonly Visit[];
   artworks: readonly Artwork[];
+  books: readonly Book[];
   creators: readonly Creator[];
+}
+
+export interface LibraryInsight {
+  /** Books on the shelf (owned or borrowed), not on the wishlist. */
+  books: number;
+  /** Finished readings, re-reads included. */
+  read: number;
+  pagesRead: number;
+  reading: Book[];
+  lent: Book[];
+  readByYear: Array<{ year: number; count: number }>;
 }
 
 export interface CountryInsight {
@@ -28,7 +40,9 @@ export interface Insights {
   };
   countries: CountryInsight[];
   visitsByYear: Array<{ year: number; count: number }>;
+  /** People with the most works across all collectible kinds, wishlists excluded. */
   topCreators: Array<{ creator: Creator; count: number }>;
+  library: LibraryInsight;
   topVenues: Array<{ venue: Venue; count: number }>;
   spectrum: string[];
   firstVisit: Visit | undefined;
@@ -45,6 +59,7 @@ export function computeInsights({
   venues,
   visits,
   artworks,
+  books,
   creators,
 }: InsightsInput): Insights {
   const seen = artworks.filter((a) => a.status === 'seen');
@@ -105,8 +120,9 @@ export function computeInsights({
 
   const creatorById = new Map(creators.map((c) => [c.id, c]));
   const creatorCounts = new Map<string, number>();
-  for (const a of seen) {
-    for (const id of a.creatorIds) creatorCounts.set(id, (creatorCounts.get(id) ?? 0) + 1);
+  const shelved = books.filter((b) => b.ownership !== 'wishlist');
+  for (const item of [...seen, ...shelved]) {
+    for (const id of item.creatorIds) creatorCounts.set(id, (creatorCounts.get(id) ?? 0) + 1);
   }
   const topCreators = [...creatorCounts]
     .flatMap(([id, count]) => {
@@ -115,6 +131,25 @@ export function computeInsights({
     })
     .sort((a, b) => b.count - a.count || a.creator.name.localeCompare(b.creator.name))
     .slice(0, 8);
+
+  const finished = books.flatMap((b) =>
+    b.readings.flatMap((r) => (r.finishedOn ? [{ book: b, on: r.finishedOn }] : [])),
+  );
+  const readYears = new Map<number, number>();
+  for (const { on } of finished) {
+    const year = Number(on.slice(0, 4));
+    readYears.set(year, (readYears.get(year) ?? 0) + 1);
+  }
+  const library: LibraryInsight = {
+    books: shelved.length,
+    read: finished.length,
+    pagesRead: finished.reduce((sum, { book }) => sum + (book.pageCount ?? 0), 0),
+    reading: books.filter((b) => b.status === 'reading'),
+    lent: books.filter((b) => b.loan),
+    readByYear: [...readYears]
+      .map(([year, count]) => ({ year, count }))
+      .sort((a, b) => a.year - b.year),
+  };
 
   const firstVisit = [...visits].sort((a, b) => a.date.localeCompare(b.date))[0];
 
@@ -131,6 +166,7 @@ export function computeInsights({
     countries,
     visitsByYear,
     topCreators,
+    library,
     topVenues,
     spectrum: sortByHue(seen.flatMap((a) => a.palette.slice(0, 3))),
     firstVisit,

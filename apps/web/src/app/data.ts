@@ -37,6 +37,9 @@ export const useArtworks = () =>
   useLocal('artworks', [], (s) => s.artworks.list().then(byNewest)).data;
 export const useArtwork = (id: string) =>
   useLocal('artworks', [id], (s) => s.artworks.get(id).then((a) => a ?? null));
+export const useBooks = () => useLocal('books', [], (s) => s.books.list().then(byNewest)).data;
+export const useBook = (id: string) =>
+  useLocal('books', [id], (s) => s.books.get(id).then((b) => b ?? null));
 export const usePlaces = () =>
   useLocal('places', [], (s) =>
     s.places.list().then((p) => p.sort((a, b) => a.name.localeCompare(b.name))),
@@ -115,11 +118,12 @@ export function useInsights() {
   const venues = useVenues();
   const visits = useVisits();
   const artworks = useArtworks();
+  const books = useBooks();
   const creators = useCreators();
   return useMemo(() => {
-    if (!places || !venues || !visits || !artworks || !creators) return undefined;
-    return computeInsights({ places, venues, visits, artworks, creators });
-  }, [places, venues, visits, artworks, creators]);
+    if (!places || !venues || !visits || !artworks || !books || !creators) return undefined;
+    return computeInsights({ places, venues, visits, artworks, books, creators });
+  }, [places, venues, visits, artworks, books, creators]);
 }
 
 /** Context passed to external API providers: UI language and optional API keys. */

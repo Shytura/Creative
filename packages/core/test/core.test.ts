@@ -5,6 +5,8 @@ import {
   archiveToSnapshot,
   artworkOfTheDay,
   artworkSchema,
+  type Book,
+  bookSchema,
   type Creator,
   collectibleKinds,
   collectibleTables,
@@ -22,11 +24,14 @@ import {
   epochOf,
   filterArtworks,
   flagEmoji,
+  isValidIsbn,
   itemIdsOf,
   migrateRow,
   migrations,
   NewerSchemaError,
   nearby,
+  nextReadings,
+  normalizeIsbn,
   type Place,
   parseArchive,
   parseYear,
@@ -56,6 +61,8 @@ const visit = (id: string, venueId: string, date: string): Visit =>
 const creator = (id: string, name: string): Creator => creatorSchema.parse({ ...meta(id), name });
 const artwork = (id: string, fields: Partial<Artwork> = {}): Artwork =>
   artworkSchema.parse({ ...meta(id), title: `Werk ${id}`, ...fields });
+const book = (id: string, fields: Partial<Book> = {}): Book =>
+  bookSchema.parse({ ...meta(id), title: `Buch ${id}`, ...fields });
 
 describe('schemas', () => {
   it('applies defaults', () => {
@@ -230,7 +237,25 @@ describe('insights', () => {
         artwork('a2', { artist: 'Werkstatt Dürers', creatorIds: ['c1'] }),
         artwork('a3', { status: 'wishlist', venueId: 'v3', creatorIds: ['c2'] }),
       ],
-      creators: [creator('c1', 'Albrecht Dürer'), creator('c2', 'Raffael')],
+      books: [
+        book('b1', {
+          creatorIds: ['c3'],
+          pageCount: 300,
+          status: 'read',
+          readings: [{ finishedOn: '2023-02-01' }, { finishedOn: '2025-03-01' }],
+        }),
+        book('b2', {
+          creatorIds: ['c3'],
+          status: 'reading',
+          loan: { name: 'Mia', since: '2025-01-01' },
+        }),
+        book('b3', { creatorIds: ['c3'], ownership: 'wishlist' }),
+      ],
+      creators: [
+        creator('c1', 'Albrecht Dürer'),
+        creator('c2', 'Raffael'),
+        creator('c3', 'Thomas Mann'),
+      ],
     });
     expect(insights.totals).toMatchObject({
       countries: 2,
@@ -244,8 +269,17 @@ describe('insights', () => {
       { year: 2023, count: 1 },
       { year: 2024, count: 2 },
     ]);
+    // Works of every kind count; wishlists do not.
     expect(insights.topCreators.map((c) => [c.creator.name, c.count])).toEqual([
       ['Albrecht Dürer', 2],
+      ['Thomas Mann', 2],
+    ]);
+    expect(insights.library).toMatchObject({ books: 2, read: 2, pagesRead: 600 });
+    expect(insights.library.reading.map((b) => b.id)).toEqual(['b2']);
+    expect(insights.library.lent.map((b) => b.id)).toEqual(['b2']);
+    expect(insights.library.readByYear).toEqual([
+      { year: 2023, count: 1 },
+      { year: 2025, count: 1 },
     ]);
     expect(insights.topVenues[0]?.venue.name).toBe('Albertina');
     expect(insights.firstVisit?.id).toBe('x1');
@@ -262,24 +296,26 @@ describe('archive', () => {
       artwork('a1', { venueId: 'v1', mediaIds: ['m1'], creatorIds: ['c1'] }),
       artwork('a2', { venueId: 'v2' }),
     ],
+    books: [book('b1', { creatorIds: ['c2'], mediaIds: ['m2'] }), book('b2')],
     collections: [],
     trips: [],
-    creators: [creator('c1', 'Albrecht Dürer')],
-    media: [
-      {
-        ...meta('m1'),
-        schemaVersion: SCHEMA_VERSION,
-        mime: 'image/webp',
-        hasBlob: true,
-        palette: [],
-      },
-    ],
+    creators: [creator('c1', 'Albrecht Dürer'), creator('c2', 'Thomas Mann')],
+    media: ['m1', 'm2'].map((id) => ({
+      ...meta(id),
+      schemaVersion: SCHEMA_VERSION,
+      mime: 'image/webp',
+      hasBlob: true,
+      palette: [],
+    })),
   };
 
   it('round-trips through JSON', () => {
     const archive = createArchive(snapshot, (id) => `data:image/webp;base64,${id}`);
     const parsed = parseArchive(JSON.parse(JSON.stringify(archive)));
-    expect(parsed.media[0]?.src).toBe('data:image/webp;base64,m1');
+    expect(parsed.media.map((m) => m.src)).toEqual([
+      'data:image/webp;base64,m1',
+      'data:image/webp;base64,m2',
+    ]);
     expect(archiveToSnapshot(parsed)).toEqual(snapshot);
   });
 
@@ -293,18 +329,24 @@ describe('archive', () => {
       name: 'Favoriten',
       items: [
         { kind: 'artwork', id: 'a1' },
+        { kind: 'book', id: 'b1' },
         { kind: 'artwork', id: 'a2' },
       ],
     });
     const subset = subsetArchive(createArchive({ ...snapshot, collections: [list] }), [
       { kind: 'artwork', id: 'a1' },
+      { kind: 'book', id: 'b1' },
     ]);
     expect(subset.artworks.map((a) => a.id)).toEqual(['a1']);
+    expect(subset.books.map((b) => b.id)).toEqual(['b1']);
     expect(subset.venues.map((v) => v.id)).toEqual(['v1']);
     expect(subset.visits.map((v) => v.id)).toEqual(['x1']);
-    expect(subset.creators.map((c) => c.id)).toEqual(['c1']);
-    expect(subset.media).toHaveLength(1);
-    expect(subset.collections[0]?.items).toEqual([{ kind: 'artwork', id: 'a1' }]);
+    expect(subset.creators.map((c) => c.id)).toEqual(['c1', 'c2']);
+    expect(subset.media.map((m) => m.id)).toEqual(['m1', 'm2']);
+    expect(subset.collections[0]?.items).toEqual([
+      { kind: 'artwork', id: 'a1' },
+      { kind: 'book', id: 'b1' },
+    ]);
     expect(subset.trips).toEqual([]);
   });
 
@@ -334,6 +376,7 @@ describe('archive', () => {
     expect(parsed.collections[0]).not.toHaveProperty('artworkIds');
     expect(parsed.artworks[0]?.schemaVersion).toBe(SCHEMA_VERSION);
     expect(parsed.places).toEqual([]);
+    expect(parsed.books).toEqual([]);
   });
 
   it('turns artist names of older archives into linked creators', () => {
@@ -379,6 +422,7 @@ describe('registry & migrations', () => {
       'venues',
       'visits',
       'artworks',
+      'books',
       'collections',
       'trips',
       'creators',
@@ -422,5 +466,56 @@ describe('collections', () => {
     expect(collectionHas(list, { kind: 'artwork', id: 'a1' })).toBe(true);
     expect(collectionHas(list, { kind: 'artwork', id: 'a3' })).toBe(false);
     expect(itemIdsOf(list, 'artwork')).toEqual(['a2', 'a1']);
+  });
+});
+
+describe('isbn', () => {
+  it('normalises ISBN-10 and ISBN-13 in common notations', () => {
+    expect(normalizeIsbn('978-3-596-29431-2')).toBe('9783596294312');
+    expect(normalizeIsbn('ISBN 978 3 596 29431 2')).toBe('9783596294312');
+    expect(normalizeIsbn('0-14-044913-2')).toBe('9780140449136');
+    expect(normalizeIsbn('ISBN-10: 080442957x')).toMatch(/^978080442957\d$/);
+  });
+
+  it('rejects wrong check digits and other numbers', () => {
+    expect(normalizeIsbn('9783596294313')).toBeUndefined();
+    expect(normalizeIsbn('0140449133')).toBeUndefined();
+    expect(isValidIsbn('4006381333931')).toBe(false); // an EAN, but not a book
+    expect(isValidIsbn('Der Zauberberg')).toBe(false);
+    expect(bookSchema.safeParse({ ...meta('b'), title: 'x', isbn: '3596294312' }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe('reading history', () => {
+  const at = (status: Book['status'], readings: Book['readings'] = []) => ({ status, readings });
+
+  it('opens a reading when starting and closes it when finishing', () => {
+    const started = nextReadings(at('unread'), 'reading', '2025-01-02');
+    expect(started).toEqual([{ startedOn: '2025-01-02' }]);
+    expect(nextReadings(at('reading', started), 'read', '2025-02-03')).toEqual([
+      { startedOn: '2025-01-02', finishedOn: '2025-02-03' },
+    ]);
+  });
+
+  it('records a finish without a start and keeps re-reads apart', () => {
+    const once = nextReadings(at('unread'), 'read', '2020-05-01');
+    expect(once).toEqual([{ finishedOn: '2020-05-01' }]);
+    expect(nextReadings(at('read', once), 'reading', '2025-01-01')).toEqual([
+      { finishedOn: '2020-05-01' },
+      { startedOn: '2025-01-01' },
+    ]);
+  });
+
+  it('closes an abandoned reading and drops one started by mistake', () => {
+    const open = [{ startedOn: '2025-01-01' }];
+    expect(nextReadings(at('reading', open), 'abandoned', '2025-01-09')).toEqual([
+      { startedOn: '2025-01-01', abandonedOn: '2025-01-09' },
+    ]);
+    expect(nextReadings(at('reading', open), 'unread', '2025-01-09')).toEqual([]);
+    expect(nextReadings(at('read', [{ finishedOn: '2020-01-01' }]), 'unread', 'x')).toEqual([
+      { finishedOn: '2020-01-01' },
+    ]);
   });
 });

@@ -13,10 +13,10 @@ import {
 // ── Collectible kinds ──────────────────────────────────────────────────────
 
 /**
- * Every entity type that can be collected into lists. Adding a type (e.g. `book`) means adding
- * it here and mapping it to its table in `registry.ts`.
+ * Every entity type that can be collected into lists. Adding a type means adding it here and
+ * mapping it to its table in `registry.ts`.
  */
-export const collectibleKinds = ['artwork'] as const;
+export const collectibleKinds = ['artwork', 'book'] as const;
 export const collectibleKindSchema = z.enum(collectibleKinds);
 export type CollectibleKind = z.infer<typeof collectibleKindSchema>;
 
@@ -125,7 +125,6 @@ export const artworkDraftSchema = z.object({
    * linked through `creatorIds`.
    */
   artist: z.string().optional(),
-  creatorIds: z.array(idSchema).default([]),
   /** Display date as written by the museum, e.g. `c. 1868–73`. */
   year: z.string().optional(),
   medium: z.string().optional(),
@@ -137,6 +136,78 @@ export const artworkDraftSchema = z.object({
 export const artworkSchema = artworkDraftSchema.extend(entityMetaShape);
 export type ArtworkDraft = z.input<typeof artworkDraftSchema>;
 export type Artwork = z.infer<typeof artworkSchema>;
+
+// ── Book: a title in the personal library ──────────────────────────────────
+
+export const bookStatuses = ['unread', 'reading', 'read', 'abandoned'] as const;
+export const bookStatusSchema = z.enum(bookStatuses);
+export type BookStatus = z.infer<typeof bookStatusSchema>;
+
+/** Whether the book is on the user's shelf; independent of the reading status. */
+export const bookOwnerships = ['owned', 'wishlist', 'borrowed'] as const;
+export const bookOwnershipSchema = z.enum(bookOwnerships);
+export type BookOwnership = z.infer<typeof bookOwnershipSchema>;
+
+export const bookFormats = ['hardcover', 'paperback', 'ebook', 'audiobook'] as const;
+export const bookFormatSchema = z.enum(bookFormats);
+export type BookFormat = z.infer<typeof bookFormatSchema>;
+
+/** One pass through a book; a reading without end date is the current one. */
+export const readingSchema = z.object({
+  startedOn: isoDateSchema.optional(),
+  finishedOn: isoDateSchema.optional(),
+  abandonedOn: isoDateSchema.optional(),
+});
+export type Reading = z.infer<typeof readingSchema>;
+
+export const quoteSchema = z.object({
+  id: idSchema,
+  text: z.string().trim().min(1),
+  page: z.number().int().positive().optional(),
+  note: z.string().optional(),
+  createdAt: z.string(),
+});
+export type Quote = z.infer<typeof quoteSchema>;
+
+/** An owned book currently lent to someone. */
+export const loanSchema = z.object({
+  name: z.string().trim().min(1),
+  since: isoDateSchema,
+  due: isoDateSchema.optional(),
+});
+export type Loan = z.infer<typeof loanSchema>;
+
+export const bookDraftSchema = z.object({
+  ...collectibleShape,
+  subtitle: z.string().optional(),
+  /** Authors as printed on the book; the people behind them are linked through `creatorIds`. */
+  authors: z.array(z.string()).default([]),
+  /** ISBN-13 without hyphens; ISBN-10 is converted on input. */
+  isbn: z
+    .string()
+    .regex(/^97[89]\d{10}$/, 'Expected ISBN-13')
+    .optional(),
+  publisher: z.string().optional(),
+  /** Publication year as printed, e.g. `1927` or `1927/2004`. */
+  year: z.string().optional(),
+  pageCount: z.number().int().positive().optional(),
+  /** ISO 639-1 code, e.g. `de`. */
+  language: z.string().optional(),
+  format: bookFormatSchema.optional(),
+  description: z.string().optional(),
+  status: bookStatusSchema.default('unread'),
+  ownership: bookOwnershipSchema.default('owned'),
+  rating: z.number().int().min(1).max(5).optional(),
+  currentPage: z.number().int().nonnegative().optional(),
+  readings: z.array(readingSchema).default([]),
+  quotes: z.array(quoteSchema).default([]),
+  loan: loanSchema.optional(),
+  source: sourceSchema.optional(),
+  ...externalIdsShape,
+});
+export const bookSchema = bookDraftSchema.extend(entityMetaShape);
+export type BookDraft = z.input<typeof bookDraftSchema>;
+export type Book = z.infer<typeof bookSchema>;
 
 // ── Collection: a user-curated, ordered list of collectibles of any kind ───
 

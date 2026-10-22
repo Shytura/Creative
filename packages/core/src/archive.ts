@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { migrateTables, NewerSchemaError } from './migrations';
-import { SCHEMA_VERSION } from './model/common';
+import { type CollectibleBase, SCHEMA_VERSION } from './model/common';
 import { type CollectibleKind, type ItemRef, mediaSchema } from './model/entities';
 import { type EntityName, type EntityOf, entities, entityNames } from './model/registry';
 import { emptySnapshot, type StoreSnapshot } from './repositories';
@@ -81,25 +81,27 @@ export function subsetArchive(archive: Archive, items: readonly ItemRef[]): Arch
   const has = (ref: ItemRef) => keys.has(`${ref.kind}:${ref.id}`);
 
   const artworks = archive.artworks.filter((a) => has({ kind: 'artwork', id: a.id }));
+  const books = archive.books.filter((b) => has({ kind: 'book', id: b.id }));
   // Listing every kind here makes adding a collectible type a compile error until handled.
-  const collectibles = { artwork: artworks } satisfies Record<
+  const collectibles = { artwork: artworks, book: books } satisfies Record<
     CollectibleKind,
-    Array<{ mediaIds: string[] }>
+    CollectibleBase[]
   >;
+  const all = Object.values(collectibles).flat();
 
-  // Artworks bring their creators and the venues, places and visits they were seen at.
+  // Every collectible brings its creators and media; artworks also the venues, places and
+  // visits they were seen at.
   const venueIds = new Set(artworks.flatMap((a) => (a.venueId ? [a.venueId] : [])));
   const venues = archive.venues.filter((v) => venueIds.has(v.id));
   const placeIds = new Set(venues.map((v) => v.placeId));
-  const creatorIds = new Set(artworks.flatMap((a) => a.creatorIds));
-  const mediaIds = new Set(
-    Object.values(collectibles).flatMap((list) => list.flatMap((c) => c.mediaIds)),
-  );
+  const creatorIds = new Set(all.flatMap((c) => c.creatorIds));
+  const mediaIds = new Set(all.flatMap((c) => c.mediaIds));
 
   return {
     ...archive,
     ...emptySnapshot(),
     artworks,
+    books,
     venues,
     places: archive.places.filter((p) => placeIds.has(p.id)),
     visits: archive.visits.filter((v) => venueIds.has(v.venueId)),

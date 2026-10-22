@@ -40,6 +40,9 @@ export const STORES: Readonly<Record<number, Record<string, string | null>>> = {
     artworks: 'id, venueId, visitId, status, createdAt, *creatorIds',
     creators: 'id, name, wikidataId',
   },
+  4: {
+    books: 'id, status, ownership, createdAt, isbn, *creatorIds',
+  },
 };
 
 export class MnemoDatabase extends Dexie {

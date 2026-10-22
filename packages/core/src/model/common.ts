@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Bumped whenever the persisted data changes shape or a table is added. Each bump comes with an
  * entry in `migrations.ts` (and a matching IndexedDB version in `@mnemo/storage-dexie`).
  */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export const idSchema = z.string().min(1);
 
@@ -52,8 +52,8 @@ export const sourceSchema = z.object({
 });
 
 /**
- * Fields every collectible type shares (artworks today, books and more later). Shared services
- * such as lists, favourites, tags and colour search rely only on these.
+ * Fields every collectible type shares (artworks, books, …). Shared services such as lists,
+ * favourites, tags, colour search and people rely only on these.
  */
 export const collectibleShape = {
   title: z.string().trim().min(1),
@@ -63,4 +63,10 @@ export const collectibleShape = {
   mediaIds: z.array(idSchema).default([]),
   /** Dominant colours of the primary image, most prominent first. */
   palette: z.array(hexColorSchema).default([]),
+  /** The people behind it: artists, authors, … */
+  creatorIds: z.array(idSchema).default([]),
 };
+
+export const collectibleBaseSchema = z.object(collectibleShape);
+/** The fields shared by every collectible kind. */
+export type CollectibleBase = z.infer<typeof collectibleBaseSchema>;

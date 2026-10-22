@@ -5,13 +5,21 @@ import {
   ensureVenue,
   ensureVisit,
   entityNames,
+  findBookByIsbn,
+  lendBook,
   mergeDuplicateCreators,
   migrations,
   removeArtwork,
+  removeBook,
   removeCreator,
   removePlace,
+  removeQuote,
+  returnBook,
   SCHEMA_VERSION,
   saveArtwork,
+  saveBook,
+  saveQuote,
+  setReadingStatus,
   toggleInCollection,
 } from '@mnemo/core';
 import { Dexie } from 'dexie';
@@ -198,12 +206,88 @@ describe('creators', () => {
     expect(await mergeDuplicateCreators(store)).toBe(0);
   });
 
-  it('unlinks works when a creator is removed', async () => {
+  it('unlinks works of every kind when a creator is removed', async () => {
     const art = await saveArtwork(store, { title: 'Kuss', artist: 'Gustav Klimt' });
+    const book = await saveBook(store, { title: 'Briefe', authors: ['Gustav Klimt'] });
+    expect(book.creatorIds).toEqual(art.creatorIds);
     await removeCreator(store, art.creatorIds[0]!);
     const after = await store.artworks.get(art.id);
     expect(after?.creatorIds).toEqual([]);
     expect(after?.artist).toBe('Gustav Klimt');
+    expect((await store.books.get(book.id))?.creatorIds).toEqual([]);
+  });
+
+  it('merges duplicates across artworks and books', async () => {
+    const a = await store.creators.create({ name: 'Goethe' });
+    const b = await store.creators.create({ name: 'goethe' });
+    const art = await store.artworks.create({ title: 'Zeichnung', creatorIds: [a.id] });
+    const book = await store.books.create({ title: 'Faust', creatorIds: [b.id, a.id] });
+    expect(await mergeDuplicateCreators(store)).toBe(1);
+    expect((await store.artworks.get(art.id))?.creatorIds).toEqual([a.id]);
+    expect((await store.books.get(book.id))?.creatorIds).toEqual([a.id]);
+  });
+});
+
+describe('library', () => {
+  it('links several authors and keeps links of names that stay', async () => {
+    const book = await saveBook(store, {
+      title: 'Good Omens',
+      authors: ['Terry Pratchett', ' Neil Gaiman', ''],
+      isbn: '0-575-04800-X',
+    });
+    expect(book.authors).toEqual(['Terry Pratchett', 'Neil Gaiman']);
+    expect(book.isbn).toBe('9780575048003');
+    expect(book.creatorIds).toHaveLength(2);
+    const [pratchett, gaiman] = book.creatorIds;
+
+    // A linked creator renamed after Wikidata keeps its books when the authors change.
+    await store.creators.update(gaiman!, { name: 'Neil Richard Gaiman' });
+    const edited = await saveBook(
+      store,
+      { title: 'Good Omens', authors: ['Neil Gaiman', 'Someone Else'] },
+      book.id,
+    );
+    expect(edited.creatorIds[0]).toBe(gaiman);
+    expect(edited.creatorIds).not.toContain(pratchett);
+    expect(await store.creators.list()).toHaveLength(3);
+    expect((await findBookByIsbn(store, '978-0-575-04800-3'))?.id).toBe(book.id);
+  });
+
+  it('tracks reading status, quotes and loans', async () => {
+    const book = await saveBook(store, { title: 'Der Zauberberg', pageCount: 1000 });
+    await store.books.update(book.id, { currentPage: 120 });
+    await setReadingStatus(store, book.id, 'reading', '2025-01-01');
+    expect((await store.books.get(book.id))?.currentPage).toBe(120);
+    const read = await setReadingStatus(store, book.id, 'read', '2025-03-01');
+    expect(read.readings).toEqual([{ startedOn: '2025-01-01', finishedOn: '2025-03-01' }]);
+    expect(read.currentPage).toBeUndefined();
+
+    const quoted = await saveQuote(store, book.id, {
+      text: 'Die Zeit ist ein Geheimnis.',
+      page: 7,
+    });
+    const quote = quoted.quotes[0]!;
+    const edited = await saveQuote(store, book.id, { text: 'Zeit', page: 8 }, quote.id);
+    expect(edited.quotes).toEqual([{ ...quote, text: 'Zeit', page: 8 }]);
+    expect((await removeQuote(store, book.id, quote.id)).quotes).toEqual([]);
+
+    const lent = await lendBook(store, book.id, { name: 'Mia', since: '2025-04-01' });
+    expect(lent.loan?.name).toBe('Mia');
+    expect((await returnBook(store, book.id)).loan).toBeUndefined();
+
+    const wish = await saveBook(store, { title: 'Doktor Faustus', ownership: 'wishlist' });
+    await expect(lendBook(store, wish.id, { name: 'Mia', since: '2025-04-01' })).rejects.toThrow();
+  });
+
+  it('removes books from lists and deletes their covers', async () => {
+    const cover = await store.media.create({ remoteUrl: 'https://example.org/c.jpg' });
+    const book = await saveBook(store, { title: 'Buddenbrooks', mediaIds: [cover.id] });
+    const list = await store.collections.create({ name: 'Lübeck' });
+    await toggleInCollection(store, list.id, { kind: 'book', id: book.id });
+    await removeBook(store, book.id);
+    expect(await store.books.get(book.id)).toBeUndefined();
+    expect(await store.media.get(cover.id)).toBeUndefined();
+    expect((await store.collections.get(list.id))?.items).toEqual([]);
   });
 });
 
@@ -285,6 +369,28 @@ describe('schema upgrades', () => {
     expect(artwork?.title).toBe('Feldhase');
     expect(artwork?.creatorIds).toEqual(['creator-albrecht-durer']);
     expect((await upgraded.creators.list()).map((c) => c.name)).toEqual(['Albrecht Dürer']);
+    expect(await upgraded.books.list()).toEqual([]);
+    await upgraded.db.delete();
+  });
+
+  it('adds the library to a database created by version 0.3', async () => {
+    const name = `legacy-${createId()}`;
+    const legacy = new Dexie(name);
+    for (const version of [1, 2, 3]) legacy.version(version).stores(STORES[version]!);
+    const row = { createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' };
+    await legacy.table('creators').add({ ...row, id: 'c1', schemaVersion: 3, name: 'Klimt' });
+    await legacy
+      .table('artworks')
+      .add({ ...row, id: 'a1', schemaVersion: 3, title: 'Kuss', creatorIds: ['c1'] });
+    legacy.close();
+
+    const upgraded = createDexieStore(name);
+    expect(await upgraded.artworks.get('a1')).toMatchObject({
+      creatorIds: ['c1'],
+      schemaVersion: SCHEMA_VERSION,
+    });
+    const book = await saveBook(upgraded, { title: 'Briefe', authors: ['Klimt'] });
+    expect(book.creatorIds).toEqual(['c1']);
     await upgraded.db.delete();
   });
 });
