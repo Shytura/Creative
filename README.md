@@ -1,92 +1,91 @@
 # Mnemo
 
-**Ein persönliches Archiv deiner Begegnungen mit Kunst.** Mnemo merkt sich, welche Werke dich
-berührt haben, wo du ihnen begegnet bist und wohin die nächste Reise gehen soll. Der Name
-kommt von Mnemosyne, der Göttin der Erinnerung und Mutter der Musen, nach denen das Museum
-benannt ist.
+**A personal archive of your encounters with art.** Mnemo remembers which works moved you,
+where you came across them and where your next trip should take you. The name comes from
+Mnemosyne, the goddess of memory and mother of the Muses, after whom the museum is named.
 
-![Salon – das Werk des Tages](docs/screenshots/salon.webp)
+![Salon – artwork of the day](docs/screenshots/salon.webp)
 
-| Salon-Hängung | Atlas |
+| Salon hang | Atlas |
 | --- | --- |
-| ![Salon-Hängung](docs/screenshots/salon-wall.webp) | ![Atlas](docs/screenshots/atlas.webp) |
-| **Reiseplaner** | **Dunkler Modus mit Hintergrund „Nocturne“** |
-| ![Reiseplaner](docs/screenshots/trip.webp) | ![Dunkel](docs/screenshots/salon-dark.webp) |
+| ![Salon hang](docs/screenshots/salon-wall.webp) | ![Atlas](docs/screenshots/atlas.webp) |
+| **Trip planner** | **Dark mode with the “Nocturne” background** |
+| ![Trip planner](docs/screenshots/trip.webp) | ![Dark mode](docs/screenshots/salon-dark.webp) |
 
-## Was die App kann
+## Features
 
-| Bereich | Funktionen |
+| Area | What it does |
 | --- | --- |
-| **Salon** | Werk des Tages aus der eigenen Sammlung, Kennzahlen, zuletzt hinzugefügt, nächste Reise, Begrüßung je nach Tageszeit |
-| **Sammlung** | Masonry-Galerie, **Salon-Hängung** (gerahmte Werke auf farbiger Wand) und Liste. Filter nach Status, Favoriten, Epoche, Künstler:in, Stadt, Schlagwort und **Farbe**. Eigene Listen, Bilder per Drag & Drop |
-| **Werk** | Großansicht mit **Deep Zoom** (OpenSeadragon, IIIF), automatisch erkannte **Farbpalette**, die Akzentfarbe der Seite passt sich dem Werk an, Quelle und Lizenz, verwandte Werke |
-| **Fotos** | Bilder werden verkleinert und lokal gespeichert. **EXIF** liefert Datum und GPS; liegt ein Museum in der Nähe, schlägt die App es vor („Warst du in der Albertina?“) |
-| **Atlas** | Eigener, papierfarbener Kartenstil (MapLibre und OpenFreeMap, ohne API-Key), besuchte und geplante Orte, Cluster, Jahresfilter, Länderliste mit Flaggen |
-| **Chronik** | Reisejournal aller Museumsbesuche nach Jahren, mit Fotos, Eindruck und Begleitung |
-| **Planer** | Board mit Idee, Geplant und Erlebt (Drag & Drop). Pro Reise: Vorschläge aus **OpenStreetMap** mit Wikipedia-Texten und -Bildern, Merkliste mit Sortierung, Karte. Abgehakte Orte werden auf Wunsch zum Besuch in der Chronik |
-| **Entdecken** | Kombinierte Suche in Wikidata/Commons, Art Institute of Chicago, The Met und Cleveland Museum of Art (optional Europeana und Harvard per Key). Übernahme als „gesehen“ oder „will ich sehen“ |
-| **Bilanz** | Länder, Städte, Besuche, Farbspektrum aller gesehenen Werke, Besuche pro Jahr, Epochen, meistgesehene Künstler:innen |
-| **Personalisierung** | Hell, dunkel oder System; Akzentfarben nach Malpigmenten oder automatisch aus dem Werk des Tages; Hintergründe: Papier, fünf Farbverläufe, eigenes Werk, eigenes Bild oder Werk des Tages (weichgezeichnet) |
-| **Daten** | Alles lokal im Browser (IndexedDB), offline nutzbar (PWA), ZIP-Sicherung, JSON-Export zum Teilen, Import |
-| **Sprachen** | Deutsch und Englisch, mit typgeprüften Übersetzungsschlüsseln |
+| **Salon** | Artwork of the day from your own collection, key figures, recently added, next trip, a greeting that depends on the time of day |
+| **Collection** | Masonry gallery, **salon hang** (framed works on a coloured wall) and list view. Filter by status, favourites, period, artist, city, tag and **colour**. Custom lists, images via drag & drop |
+| **Artwork** | Large view with **deep zoom** (OpenSeadragon, IIIF), automatically extracted **colour palette**, the page accent colour adapts to the work, source and licence, related works |
+| **Photos** | Images are downscaled and stored locally. **EXIF** provides date and GPS; if a museum is nearby, the app suggests it (“Were you at the Albertina?”) |
+| **Atlas** | Custom paper-toned map style (MapLibre and OpenFreeMap, no API key), visited and planned places, clusters, year filter, country list with flags |
+| **Journal** | Travel journal of all museum visits by year, with photos, impressions and companions |
+| **Planner** | Board with Idea, Planned and Done (drag & drop). Per trip: suggestions from **OpenStreetMap** with Wikipedia texts and images, a sortable watchlist, a map. Checked-off places can become a visit in the journal |
+| **Discover** | Combined search across Wikidata/Commons, Art Institute of Chicago, The Met and Cleveland Museum of Art (optionally Europeana and Harvard with a key). Add results as “seen” or “want to see” |
+| **Insights** | Countries, cities, visits, colour spectrum of all works seen, visits per year, periods, most-seen artists |
+| **Personalisation** | Light, dark or system; accent colours based on painting pigments or taken automatically from the artwork of the day; backgrounds: paper, five gradients, one of your works, your own image or the artwork of the day (blurred) |
+| **Data** | Everything stays local in the browser (IndexedDB), works offline (PWA), ZIP backup, JSON export for sharing, import |
+| **Languages** | German and English, with type-checked translation keys |
 
-## Schnellstart
+## Quick start
 
-Voraussetzungen: Node.js ≥ 24 und pnpm.
+Requirements: Node.js ≥ 24 and pnpm.
 
 ```bash
 pnpm install
-pnpm dev          # App auf http://localhost:5173
-pnpm dev:embed    # Widget-Demo auf http://localhost:5174
+pnpm dev          # app at http://localhost:5173
+pnpm dev:embed    # widget demo at http://localhost:5174
 ```
 
-Beim ersten Start bietet der Salon **„Mit Beispielen starten“** an. Dann werden neun
-gemeinfreie Werke, fünf Museen und zwei Reiseideen angelegt. Unter Einstellungen → Daten
-lässt sich das jederzeit wieder löschen.
+On first launch the Salon offers **“Start with examples”**. This creates nine public-domain
+works, five museums and two trip ideas. You can delete them again at any time under
+Settings → Data.
 
-| Befehl | Zweck |
+| Command | Purpose |
 | --- | --- |
-| `pnpm build` | Widget und App bauen (`apps/web/dist`, inkl. Service Worker und Icons) |
-| `pnpm preview` | Produktions-Build lokal ausliefern |
-| `pnpm check` | Lint + Typecheck + Unit-Tests |
+| `pnpm build` | Build the widget and the app (`apps/web/dist`, incl. service worker and icons) |
+| `pnpm preview` | Serve the production build locally |
+| `pnpm check` | Lint + typecheck + unit tests |
 | `pnpm test` | Vitest (core, storage, providers, embed, web) |
-| `pnpm e2e` | Playwright-Tests auf Desktop und Mobil, ohne Netzwerkzugriff (einmalig `pnpm exec playwright install chromium`) |
-| `pnpm format` | Biome-Formatierung |
+| `pnpm e2e` | Playwright tests on desktop and mobile, without network access (run `pnpm exec playwright install chromium` once) |
+| `pnpm format` | Biome formatting |
 
-## Architektur
+## Architecture
 
 ```
 apps/
   web/            PWA: React 19, TanStack Router + Query, Tailwind v4
-  embed-demo/     fremde Beispielseite, die das Widget einbindet
+  embed-demo/     third-party sample page that embeds the widget
 packages/
-  core/           Datenmodell (zod), Repository-Verträge, Domänenlogik – ohne React, ohne DB
-  storage-dexie/  IndexedDB-Implementierung des Stores
-  providers/      Adapter für Museums-APIs, Geocoding, POIs, Wikipedia
-  ui/             Design-System: Tokens, Tailwind-Theme, Komponenten
-  i18n/           Wörterbücher de/en + i18next-Setup
-  embed/          <mnemo-gallery> Web Component (12 kB, ohne Framework)
+  core/           data model (zod), repository contracts, domain logic – no React, no DB
+  storage-dexie/  IndexedDB implementation of the store
+  providers/      adapters for museum APIs, geocoding, POIs, Wikipedia
+  ui/             design system: tokens, Tailwind theme, components
+  i18n/           de/en dictionaries + i18next setup
+  embed/          <mnemo-gallery> web component (12 kB, no framework)
 ```
 
-Die Abhängigkeiten zeigen nur nach innen: `web → ui, providers, storage-dexie, i18n → core`.
-`core` kennt weder React noch IndexedDB.
+Dependencies only point inwards: `web → ui, providers, storage-dexie, i18n → core`.
+`core` knows neither React nor IndexedDB.
 
-**Datenfluss:** Features lesen über Hooks in `apps/web/src/app/data.ts`, also über TanStack
-Query mit Schlüsseln `['local', tabelle, …]`. Schreibzugriffe gehen direkt an den Store
-(`useStore()`). Der Store meldet jede Änderung, auch aus anderen Tabs, und `MnemoProvider`
-invalidiert dann die betroffenen Abfragen. Deshalb gibt es keinen manuellen Refresh und
-keinen globalen State-Container.
+**Data flow:** Features read through hooks in `apps/web/src/app/data.ts`, i.e. through
+TanStack Query with keys `['local', table, …]`. Writes go straight to the store
+(`useStore()`). The store reports every change, including those from other tabs, and
+`MnemoProvider` then invalidates the affected queries. That is why there is no manual refresh
+and no global state container.
 
-**Domänenregeln** liegen in `packages/core/src/services`, etwa „Ort löschen löscht auch Besuche
-und entkoppelt Werke“ oder „erledigter Reisepunkt wird zum Besuch“. Dadurch gelten sie für
-jedes Speicher-Backend gleich.
+**Domain rules** live in `packages/core/src/services`, for example “deleting a place also
+deletes its visits and unlinks its works” or “a completed trip item becomes a visit”. This
+way they apply equally to every storage backend.
 
-## Erweitern und integrieren
+## Extending and integrating
 
-### 1. Ein anderes Backend anschließen
+### 1. Plug in a different backend
 
-Implementiere das Interface `MnemoStore` aus `@mnemo/core` (z. B. über REST oder Supabase) und
-übergib es der App:
+Implement the `MnemoStore` interface from `@mnemo/core` (e.g. via REST or Supabase) and pass
+it to the app:
 
 ```tsx
 import { AppProviders } from './app/providers';
@@ -96,89 +95,87 @@ import { AppProviders } from './app/providers';
 </AppProviders>
 ```
 
-Wichtig ist nur, dass `subscribe()` Änderungen meldet, etwa per WebSocket oder nach eigenen
-Schreibzugriffen. Alle Features bleiben unverändert. `snapshot()` und `restore()` sind die
-Grundlage für einen späteren Sync.
+The only requirement is that `subscribe()` reports changes, for example via WebSocket or
+after your own writes. All features stay unchanged. `snapshot()` and `restore()` are the
+foundation for a future sync.
 
-### 2. Teile in eine andere React-App übernehmen
+### 2. Reuse parts in another React app
 
-- `@mnemo/ui`: Komponenten und Tokens. Im eigenen CSS `@import '@mnemo/ui/theme.css'` und
-  `@source '<pfad>/packages/ui/src'` eintragen. Farben, Schriften und Radien sind
-  `--mn-*`-Variablen und lassen sich auf jedem Elternelement überschreiben.
-- `@mnemo/providers`: Museums- und Ortssuche ohne React, nutzbar auch serverseitig.
-- `@mnemo/core`: Datenmodell, Validierung, Statistiken und Filter.
-- Feature-Seiten aus `apps/web/src/features/*` laufen in jeder App, die `AppProviders`
-  verwendet.
+- `@mnemo/ui`: components and tokens. Add `@import '@mnemo/ui/theme.css'` and
+  `@source '<path>/packages/ui/src'` to your own CSS. Colours, fonts and radii are
+  `--mn-*` variables and can be overridden on any parent element.
+- `@mnemo/providers`: museum and place search without React, usable on the server too.
+- `@mnemo/core`: data model, validation, statistics and filters.
+- Feature pages from `apps/web/src/features/*` run in any app that uses `AppProviders`.
 
-### 3. Das Widget auf einer beliebigen Webseite einbetten
+### 3. Embed the widget on any website
 
-1. In Mnemo unter Einstellungen → Daten → *Zum Teilen & Einbetten* eine Liste als JSON
-   exportieren.
-2. `pnpm --filter @mnemo/embed build` erzeugt `packages/embed/dist/mnemo-embed.js`.
-3. Beides auf die Webseite legen und einbinden:
+1. In Mnemo, export a list as JSON under Settings → Data → *For sharing & embedding*.
+2. `pnpm --filter @mnemo/embed build` produces `packages/embed/dist/mnemo-embed.js`.
+3. Put both on your website and include them:
 
 ```html
 <script type="module" src="mnemo-embed.js"></script>
-<mnemo-gallery src="mnemo-lieblingswerke.json" collection="Lieblingswerke" theme="auto" columns="3"></mnemo-gallery>
+<mnemo-gallery src="mnemo-favourites.json" collection="Favourites" theme="auto" columns="3"></mnemo-gallery>
 ```
 
-| Attribut | Bedeutung |
+| Attribute | Meaning |
 | --- | --- |
-| `src` | URL des JSON-Exports (alternativ per JS: `el.data = archiv`) |
-| `collection` | Name oder ID einer Liste |
+| `src` | URL of the JSON export (alternatively via JS: `el.data = archive`) |
+| `collection` | Name or ID of a list |
 | `filter` | `all`, `favorites`, `seen`, `wishlist` |
-| `limit`, `columns`, `heading` | Anzahl, Spalten, eigene Überschrift |
+| `limit`, `columns`, `heading` | Number of items, columns, custom heading |
 | `theme` | `light`, `dark`, `auto` |
-| `lang` | `de` oder `en` |
+| `lang` | `de` or `en` |
 
-Das Widget sendet `mnemo-select` mit dem gewählten Werk als `detail`. Gestalten lässt es sich
-von außen über `--mnemo-accent`, `--mnemo-bg`, `--mnemo-font-display` usw. sowie über
-`::part(item)`, `::part(caption)` und `::part(header)`.
+The widget dispatches `mnemo-select` with the selected work as `detail`. It can be styled
+from the outside via `--mnemo-accent`, `--mnemo-bg`, `--mnemo-font-display` etc., as well as
+via `::part(item)`, `::part(caption)` and `::part(header)`.
 
-![Widget auf einer fremden Seite](docs/screenshots/embed.webp)
+![Widget on a third-party page](docs/screenshots/embed.webp)
 
-### 4. Eine neue Kunst-Datenquelle hinzufügen
+### 4. Add a new art data source
 
-`ArtworkSearchProvider` in `packages/providers/src/art/` implementieren und in `artProviders`
-(`packages/providers/src/index.ts`) eintragen. „Entdecken“ zeigt sie dann automatisch an.
-Mapper-Funktionen bitte mit einer echten, gekürzten API-Antwort in `test/fixtures/` testen.
+Implement `ArtworkSearchProvider` in `packages/providers/src/art/` and register it in
+`artProviders` (`packages/providers/src/index.ts`). “Discover” then shows it automatically.
+Please test mapper functions against a real, trimmed API response in `test/fixtures/`.
 
-## Externe Dienste: Hinweise aus der Praxis
+## External services: notes from practice
 
-Alle Dienste sind kostenlos und brauchen keinen Account. Einige Eigenheiten fängt der Code ab:
+All services are free and require no account. The code handles a few quirks:
 
-- **The Met:** Die alte Such-API `v1/search` wurde am 1. 10. 2026 abgeschaltet. Mnemo nutzt
+- **The Met:** The old search API `v1/search` was shut down on October 1, 2026. Mnemo uses
   `v1.1/search`.
-- **Wikimedia (Wikidata, Commons, Wikipedia):** Anfragen tragen einen `Api-User-Agent`.
-  `Special:FilePath`-Links senden keine CORS-Header, deshalb löst Mnemo sie vor dem Download
-  über die Commons-API auf, damit Bilder lokal gespeichert und analysiert werden können. Bei
-  Überlastung drosselt der Wikidata-Query-Service zeitweise (HTTP 429). Titel- und
-  Künstlersuche laufen deshalb getrennt und dürfen einzeln scheitern.
-- **Overpass (Reisevorschläge):** Die öffentlichen Server sind oft ausgelastet; Antworten
-  können 30–60 s dauern. Mnemo fragt zwei Instanzen parallel an, nimmt die erste Antwort und
-  speichert Ergebnisse einen Tag zwischen.
-- **Cleveland Museum of Art:** Das CDN liefert gecachte Antworten teils ohne CORS-Header. Ein
-  zusätzlicher Parameter hält Browser-Anfragen in eigenen Cache-Einträgen.
-- **Art Institute of Chicago:** Die Bildserver liegen hinter Cloudflare und blockieren
-  automatisierte Browser. In normalen Browsern funktionieren sie in der Regel. Wenn nicht,
-  zeigt Mnemo einen typografischen Platzhalter und speichert nur den Link.
-- **Europeana / Harvard:** Kostenlosen Key holen und in den Einstellungen eintragen.
+- **Wikimedia (Wikidata, Commons, Wikipedia):** Requests carry an `Api-User-Agent`.
+  `Special:FilePath` links send no CORS headers, so Mnemo resolves them through the Commons
+  API before downloading, allowing images to be stored and analysed locally. Under heavy load
+  the Wikidata Query Service throttles temporarily (HTTP 429). Title and artist searches
+  therefore run separately and may fail individually.
+- **Overpass (trip suggestions):** The public servers are often busy; responses can take
+  30–60 s. Mnemo queries two instances in parallel, takes the first response and caches
+  results for a day.
+- **Cleveland Museum of Art:** The CDN sometimes serves cached responses without CORS
+  headers. An extra parameter keeps browser requests in their own cache entries.
+- **Art Institute of Chicago:** The image servers sit behind Cloudflare and block automated
+  browsers. In regular browsers they usually work. If not, Mnemo shows a typographic
+  placeholder and stores only the link.
+- **Europeana / Harvard:** Get a free key and enter it in the settings.
 
-## Datenschutz
+## Privacy
 
-Alle Einträge und Bilder bleiben in der IndexedDB deines Browsers. Mnemo bittet den Browser
-um dauerhaften Speicher (`navigator.storage.persist()`). Externe Dienste bekommen nur, was du
-suchst: Suchbegriffe, Ortskoordinaten für Vorschläge und Bildabrufe. Da es keinen Server gibt,
-gibt es auch keinen Sync. Sichere deine Daten deshalb regelmäßig als ZIP.
+All entries and images stay in your browser's IndexedDB. Mnemo asks the browser for
+persistent storage (`navigator.storage.persist()`). External services only receive what you
+search for: search terms, place coordinates for suggestions and image requests. Since there
+is no server, there is no sync either, so back up your data regularly as a ZIP.
 
-## Ideen für später
+## Ideas for later
 
-Im Code sind dafür Erweiterungspunkte vorbereitet:
+The code already has extension points prepared for these:
 
-- **Sync:** ein `storage-rest`-Paket gegen ein kleines Backend; `snapshot`/`restore` und
-  `schemaVersion` sind schon da.
-- **Ausstellungsmodus:** Vollbild-Diashow mit Ken-Burns-Effekt über eine Liste.
-- **Kunstpass:** Stempel pro besuchtem Museum, Sammelalbum in der Bilanz.
-- **Teilen:** Postkarte eines Werks als PNG mit Palette und Notiz.
-- **Vergleich:** zwei Werke nebeneinander mit synchronem Deep Zoom.
-- **Museumsschilder per OCR** (z. B. Tesseract.js) ausfüllen lassen.
+- **Sync:** a `storage-rest` package against a small backend; `snapshot`/`restore` and
+  `schemaVersion` are already in place.
+- **Exhibition mode:** full-screen slideshow with a Ken Burns effect over a list.
+- **Art passport:** a stamp per museum visited, a collector's album in Insights.
+- **Sharing:** a postcard of a work as PNG with palette and note.
+- **Comparison:** two works side by side with synchronised deep zoom.
+- **Museum labels via OCR** (e.g. Tesseract.js) to fill in details automatically.
