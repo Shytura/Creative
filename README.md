@@ -24,6 +24,7 @@ Mnemosyne, the goddess of memory and mother of the Muses, after whom the museum 
 | **Journal** | Travel journal of all museum visits by year, with photos, impressions and companions |
 | **Planner** | Board with Idea, Planned and Done (drag & drop). Per trip: suggestions from **OpenStreetMap** with Wikipedia texts and images, a sortable watchlist, a map. Checked-off places can become a visit in the journal |
 | **Discover** | Combined search across Wikidata/Commons, Art Institute of Chicago, The Met and Cleveland Museum of Art (optionally Europeana and Harvard with a key). Add results as “seen” or “want to see” |
+| **People** | A page per artist with life dates, portrait, Wikipedia text and all their works; link to Wikidata in one step |
 | **Insights** | Countries, cities, visits, colour spectrum of all works seen, visits per year, periods, most-seen artists |
 | **Personalisation** | Light, dark or system; accent colours based on painting pigments or taken automatically from the artwork of the day; backgrounds: paper, five gradients, one of your works, your own image or the artwork of the day (blurred) |
 | **Data** | Everything stays local in the browser (IndexedDB), works offline (PWA), ZIP backup, JSON export for sharing, import |
@@ -86,6 +87,12 @@ IndexedDB store are derived from it, so a new type is one schema plus one regist
 per-row step to `packages/core/src/migrations.ts`; the same steps run when IndexedDB upgrades
 (Dexie versions follow the schema version, see `packages/storage-dexie/src/db.ts`) and when an
 older backup is imported. Rows carry their own `schemaVersion`, so mixed data migrates safely.
+Steps that span tables (e.g. turning artist names into linked people) use `dataset` transforms,
+which run after the row transforms of the same step.
+
+**People.** Artworks keep `artist` as the attribution the museum gives (“Workshop of Rubens”)
+and link the people behind it through `creatorIds`. Creators can be linked to Wikidata for life
+dates, portrait and Wikipedia article; books will reuse them as authors.
 
 **Collectibles and lists.** Types that can be collected (today artworks) share
 `collectibleShape` (title, favourite, tags, notes, images, palette). Lists hold typed
@@ -206,8 +213,7 @@ is no server, there is no sync either, so back up your data regularly as a ZIP.
 
 The foundation (registry, migrations, typed lists, app modules) is in place for these steps:
 
-1. **People:** a `creators` entity (artists, later authors) linked to Wikidata, replacing the
-   free-text artist field via a migration.
+1. ~~**People:**~~ done in 0.3: creators linked to Wikidata.
 2. **Library:** a `book` collectible with Open Library and Google Books as sources, ISBN scan
    via the camera, reading status, quotes and lending.
 3. **More data:** further museum APIs (Rijksmuseum, V&A, Smithsonian), a `⌘K` search across all

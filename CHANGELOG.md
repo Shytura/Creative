@@ -4,6 +4,31 @@ All notable changes to Mnemo. The format follows [Keep a Changelog](https://keep
 and the app uses [Semantic Versioning](https://semver.org/). User-facing release notes live in
 `apps/web/src/changelog.ts` and appear in the app under “What's new”.
 
+## [0.3.0] – 2026-10-22
+
+People behind the works, ready to be shared with a future library.
+
+### Added
+- **Creators** (`creators` table): name, life dates, description, portrait and Wikidata/Wikipedia
+  links. Artworks keep `artist` as the attribution text and link people through `creatorIds`.
+- `saveArtwork()` keeps creator links in step with the attribution; `ensureCreator()`,
+  `removeCreator()` and `mergeDuplicateCreators()` (run after merge imports).
+- **People provider** `wikidataPeopleProvider` (search and lookup via the Wikidata API), tested
+  against trimmed real responses.
+- Creator page `/creator/$creatorId` and an edit dialog with Wikidata search, as the new
+  `people` module.
+- **Data set migrations:** `Migration.dataset` transforms run across tables after the row
+  transforms, both in IndexedDB upgrades and on archive import.
+
+### Changed
+- **Schema 3:** artworks gain `creatorIds`; existing attributions become creators with stable
+  ids (`creator-<name>`), so repeated imports reuse them. IndexedDB indexes `*creatorIds`.
+- Insights rank creators (`topCreators`) instead of attribution strings.
+- Imported archives report the current version after migration.
+
+### Fixed
+- Insights and settings overflowed horizontally on phones (grid columns sized to their content).
+
 ## [0.2.0] – 2026-10-22
 
 Foundation for more collection types (books next), cloud sync and further data sources.

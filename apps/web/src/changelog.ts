@@ -21,6 +21,37 @@ export interface Release {
 
 export const releases: readonly Release[] = [
   {
+    version: '0.3.0',
+    date: '2026-10-22',
+    entries: [
+      {
+        kind: 'new',
+        de: 'Künstler:innen haben eine eigene Seite mit Lebensdaten und allen ihren Werken in deiner Sammlung. Ein Klick auf den Namen unter einem Werk führt dorthin.',
+        en: 'Artists have their own page with life dates and all their works in your collection. Click the name below a work to get there.',
+      },
+      {
+        kind: 'new',
+        de: 'Mit Wikidata verknüpfen: Porträt, Lebensdaten und der Wikipedia-Artikel werden übernommen.',
+        en: 'Link to Wikidata to bring in portrait, life dates and the Wikipedia article.',
+      },
+      {
+        kind: 'improved',
+        de: 'Deine bisherigen Werke wurden automatisch ihren Künstler:innen zugeordnet. Die Zuschreibung bleibt so, wie du sie eingetragen hast, z. B. „Werkstatt des Rubens“.',
+        en: 'Your existing works were linked to their artists automatically. The attribution stays as you entered it, e.g. “Workshop of Rubens”.',
+      },
+      {
+        kind: 'improved',
+        de: 'Die Bilanz verlinkt die meistgesehenen Künstler:innen direkt auf ihre Seiten.',
+        en: 'Insights link your most-seen artists straight to their pages.',
+      },
+      {
+        kind: 'fixed',
+        de: 'Bilanz und Einstellungen passen auf dem Handy wieder in die Bildschirmbreite.',
+        en: 'Insights and settings fit the screen width on phones again.',
+      },
+    ],
+  },
+  {
     version: '0.2.0',
     date: '2026-10-22',
     entries: [
